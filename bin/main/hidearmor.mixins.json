@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.glow.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "hidearmor-refmap.json",
+	"mixins": [],
+	"client": [
+	  "ArmorHideMixin",
+	  "gender.GenderArmorLayerMixin"
+	],
+	"injectors": {
+	  "defaultRequire": 1
+	}
+  }
