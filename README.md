@@ -1,1 +1,1 @@
-# Hide-Your-Armor
+# Hide-Your-Armor Minecraft Mod
