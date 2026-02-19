@@ -1,6 +1,6 @@
-# HideArmorMod (Minecraft 1.21.4)
+# HideArmorMod (Minecraft 1.21.11)
 
-A sleek and lightweight Fabric mod for Minecraft 1.21.4 that allows you to hide armor and off-hand shields individually through a custom GUI.
+A sleek and lightweight Fabric mod for Minecraft 1.21.11 that allows you to hide armor and off-hand shields individually through a custom GUI.
 
 ## Features
 
@@ -9,11 +9,11 @@ A sleek and lightweight Fabric mod for Minecraft 1.21.4 that allows you to hide 
 - **Individual Armor Toggles**: Hide Helmet, Chestplate, Leggings, or Boots separately.
 - **Shield Hiding**: Toggle visibility for shields held in either hand.
 - **WGFM Support**: Full compatibility with Wildfire's Female Gender Mod.
-- **1.21.4 Native**: Built specifically for the new rendering system in Minecraft 1.21.4.
+- **1.21.11 Native**: Built specifically for the updated rendering system in Minecraft 1.21.11.
 
 ## Installation
 
-1. Make sure you have [Fabric Loader](https://fabricmc.net/) installed for Minecraft 1.21.4.
+1. Make sure you have [Fabric Loader](https://fabricmc.net/) installed for Minecraft 1.21.11.
 2. Download the latest release from [Releases](https://github.com/your-username/HideArmorMod/releases).
 3. Place the `.jar` file in your Minecraft `mods` folder.
 4. (Optional) Install [Fabric API](https://curseforge.com/minecraft/mc-mods/fabric-api) for better compatibility.

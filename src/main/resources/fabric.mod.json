@@ -9,7 +9,8 @@
     ],
     "contact": {
         "homepage": "https://example.com",
-        "sources": "https://github.com/example/hidearmor"
+        "sources": "https://github.com/example/hidearmor",
+        "issues": "https://github.com/example/hidearmor/issues"
     },
     "license": "MIT",
     "icon": "assets/hidearmor/icon.png",
@@ -24,7 +25,7 @@
     ],
     "depends": {
         "fabricloader": ">=0.12.5",
-        "minecraft": "1.21.4",
+        "minecraft": "1.21.11",
         "java": ">=21",
         "fabric-api": "*"
     },

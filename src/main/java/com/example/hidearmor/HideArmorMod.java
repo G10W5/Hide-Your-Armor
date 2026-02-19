@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class HideArmorMod implements ClientModInitializer {
@@ -20,7 +21,7 @@ public class HideArmorMod implements ClientModInitializer {
                 "key.hidearmor.toggle",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
-                "category.hidearmor"));
+                KeyBinding.Category.create(Identifier.of("hidearmor", "main"))));
 
         // Register the keybind handler
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
