@@ -1,0 +1,20 @@
+# Gradle
+.gradle
+build/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Minecraft/Fabric
+run/
+.fabric/
+
+# Logs
+logs/
+
+# MacOS
+.DS_Store
