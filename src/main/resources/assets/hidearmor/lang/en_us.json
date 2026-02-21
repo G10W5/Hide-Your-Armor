@@ -5,11 +5,11 @@
   "message.hidearmor.hidden": "Hidden",
   "message.hidearmor.visible": "Visible",
   "gui.hidearmor.title": "Hide Armor Settings",
-  "gui.hidearmor.helmet": "Helmet",
-  "gui.hidearmor.chestplate": "Chestplate",
-  "gui.hidearmor.leggings": "Leggings",
-  "gui.hidearmor.boots": "Boots",
-  "gui.hidearmor.shield": "Shield",
-  "gui.hidearmor.visible": "Visible",
-  "gui.hidearmor.hidden": "Hidden"
+  "gui.hidearmor.helmet": "Helmet Opacity",
+  "gui.hidearmor.chestplate": "Chestplate Opacity",
+  "gui.hidearmor.leggings": "Leggings Opacity",
+  "gui.hidearmor.boots": "Boots Opacity",
+  "gui.hidearmor.shield": "Offhand Opacity",
+  "gui.hidearmor.offhand": "Offhand Opacity",
+  "gui.hidearmor.opacity": "%d%%"
 }

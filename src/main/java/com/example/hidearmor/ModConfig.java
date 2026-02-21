@@ -14,11 +14,14 @@ public class ModConfig {
     private static final File CONFIG_FILE = new File(FabricLoader.getInstance().getConfigDir().toFile(),
             "hidearmor.json");
 
-    public boolean helmet = true;
-    public boolean chestplate = true;
-    public boolean leggings = true;
-    public boolean boots = true;
-    public boolean shield = true;
+    public float helmetOpacity = 1.0f;
+    public float chestplateOpacity = 1.0f;
+    public float leggingsOpacity = 1.0f;
+    public float bootsOpacity = 1.0f;
+    public float shieldOpacity = 1.0f;
+    // Toggle visiblity for special items
+    public boolean showElytra = true;
+    public boolean showSkullsAndBlocks = true;
 
     public void save() {
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {

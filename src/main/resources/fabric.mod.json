@@ -14,7 +14,7 @@
     },
     "license": "MIT",
     "icon": "assets/hidearmor/icon.png",
-    "environment": "*",
+    "environment": "client",
     "entrypoints": {
         "client": [
             "com.example.hidearmor.HideArmorMod"

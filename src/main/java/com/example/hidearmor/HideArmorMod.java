@@ -5,13 +5,12 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class HideArmorMod implements ClientModInitializer {
     private static ModConfig config;
-    private static KeyBinding toggleKey;
+    public static KeyBinding toggleKey;
 
     @Override
     public void onInitializeClient() {
@@ -25,8 +24,14 @@ public class HideArmorMod implements ClientModInitializer {
 
         // Register the keybind handler
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (toggleKey.wasPressed() && client.player != null) {
-                client.setScreen(new HideArmorScreen(Text.translatable("gui.hidearmor.title")));
+            while (toggleKey.wasPressed()) {
+                if (client.player != null) {
+                    if (client.currentScreen instanceof HideArmorScreen screen) {
+                        screen.close();
+                    } else if (client.currentScreen == null) {
+                        client.setScreen(new HideArmorScreen(null));
+                    }
+                }
             }
         });
     }
@@ -35,23 +40,34 @@ public class HideArmorMod implements ClientModInitializer {
         return config;
     }
 
-    public static boolean isHelmetHidden() {
-        return config != null && !config.helmet;
+    public static float getHelmetOpacity() {
+        return config != null ? config.helmetOpacity : 1.0f;
     }
 
-    public static boolean isChestplateHidden() {
-        return config != null && !config.chestplate;
+    public static float getChestplateOpacity() {
+        return config != null ? config.chestplateOpacity : 1.0f;
     }
 
-    public static boolean isLeggingsHidden() {
-        return config != null && !config.leggings;
+    public static float getLeggingsOpacity() {
+        return config != null ? config.leggingsOpacity : 1.0f;
     }
 
-    public static boolean isBootsHidden() {
-        return config != null && !config.boots;
+    public static float getBootsOpacity() {
+        return config != null ? config.bootsOpacity : 1.0f;
     }
 
-    public static boolean isShieldHidden() {
-        return config != null && !config.shield;
+    public static float getShieldOpacity() {
+        return config != null ? config.shieldOpacity : 1.0f;
+    }
+
+    public static boolean isElytraVisible() {
+        return config == null || config.showElytra;
+    }
+
+    public static volatile boolean isRenderingLocalShield = false;
+    public static volatile boolean isFirstPersonShield = false;
+
+    public static boolean isSkullsAndBlocksVisible() {
+        return config == null || config.showSkullsAndBlocks;
     }
 }
