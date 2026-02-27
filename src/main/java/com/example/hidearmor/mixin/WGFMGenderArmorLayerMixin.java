@@ -26,10 +26,25 @@ public class WGFMGenderArmorLayerMixin {
     private static final ThreadLocal<Identifier> CURRENT_TEXTURE = new ThreadLocal<>();
 
     /**
-     * Cancel the armor render entirely at 0% opacity.
+     * Cancel the breast armor render entirely at 0% opacity.
      */
     @Inject(method = "renderBreastArmor", at = @At("HEAD"), cancellable = true, remap = false)
     private void onRenderHead(CallbackInfo ci) {
+        if (!LocalPlayerTracker.isRenderingLocalPlayer())
+            return;
+        float alpha = HideArmorMod.getConfig().chestplateOpacity;
+        if (alpha <= 0.0f) {
+            ci.cancel();
+        }
+    }
+
+    /**
+     * Cancel the breast armor TRIM render entirely at 0% opacity.
+     * Trim is rendered separately from the main armor geometry, so it needs its own
+     * cancel.
+     */
+    @Inject(method = "renderArmorTrim", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onRenderArmorTrimHead(CallbackInfo ci) {
         if (!LocalPlayerTracker.isRenderingLocalPlayer())
             return;
         float alpha = HideArmorMod.getConfig().chestplateOpacity;

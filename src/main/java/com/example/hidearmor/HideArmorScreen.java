@@ -9,6 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,8 @@ public class HideArmorScreen extends Screen {
         private static final float ANIM_MS = 380f;
 
         private PlayerPreviewWidget previewWidget;
+        private net.minecraft.client.gui.widget.ClickableWidget chestplateSlider;
+        private final boolean isWGFMLoaded = FabricLoader.getInstance().isModLoaded("wildfire_gender");
 
         // Item icons drawn next to each slider (cleared on every rebuildWidgets)
         private record IconInfo(net.minecraft.item.Item item, int x, int y) {
@@ -108,7 +111,7 @@ public class HideArmorScreen extends Screen {
                 if (activeTab == ActiveTab.ARMOR) {
                         addSlider(sliderX, iconX, sliderY, "gui.hidearmor.helmet", Items.DIAMOND_HELMET,
                                         config.helmetOpacity, v -> config.helmetOpacity = v.floatValue());
-                        addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
+                        this.chestplateSlider = addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
                                         Items.DIAMOND_CHESTPLATE, config.chestplateOpacity,
                                         v -> config.chestplateOpacity = v.floatValue());
                         addSlider(sliderX, iconX, sliderY + SPACING * 2, "gui.hidearmor.leggings",
@@ -117,8 +120,13 @@ public class HideArmorScreen extends Screen {
                         addSlider(sliderX, iconX, sliderY + SPACING * 3, "gui.hidearmor.boots", Items.DIAMOND_BOOTS,
                                         config.bootsOpacity, v -> config.bootsOpacity = v.floatValue());
                 } else {
-                        addSlider(sliderX, iconX, sliderY, "gui.hidearmor.offhand", Items.SHIELD, config.shieldOpacity,
-                                        v -> config.shieldOpacity = v.floatValue());
+                        String btnText = Text.translatable("gui.hidearmor.shield").getString() + ": "
+                                        + (config.shieldOpacity > 0.5f ? "ON" : "OFF");
+                        this.addDrawableChild(ButtonWidget.builder(Text.literal(btnText), btn -> {
+                                config.shieldOpacity = (config.shieldOpacity > 0.5f) ? 0.0f : 1.0f;
+                                rebuildWidgets();
+                        }).dimensions(sliderX, sliderY, SLIDER_W, 20).build());
+                        sliderIcons.add(new IconInfo(Items.SHIELD, iconX, sliderY + 2));
                 }
 
                 // ---- Visibility toggles ----
@@ -149,17 +157,21 @@ public class HideArmorScreen extends Screen {
                 this.addDrawableChild(this.previewWidget);
         }
 
-        private void addSlider(int sliderX, int iconX, int sliderY, String key, net.minecraft.item.Item icon,
+        private net.minecraft.client.gui.widget.ClickableWidget addSlider(int sliderX, int iconX, int sliderY,
+                        String key, net.minecraft.item.Item icon,
                         float init, java.util.function.Consumer<Double> setter) {
                 // Direct slider widget
-                this.addDrawableChild(new SimpleOption<>(key, SimpleOption.emptyTooltip(),
+                net.minecraft.client.gui.widget.ClickableWidget widget = new SimpleOption<>(key,
+                                SimpleOption.emptyTooltip(),
                                 (t, v) -> Text.literal(Text.translatable(key).getString().split(" ")[0] + " "
                                                 + (int) (v * 100) + "%"),
                                 SimpleOption.DoubleSliderCallbacks.INSTANCE, Codec.DOUBLE, (double) init, setter)
-                                .createWidget(client.options, sliderX, sliderY, SLIDER_W));
+                                .createWidget(client.options, sliderX, sliderY, SLIDER_W);
+                this.addDrawableChild(widget);
 
                 // Store icon info for rendering
                 sliderIcons.add(new IconInfo(icon, iconX, sliderY + 2));
+                return widget;
         }
 
         // ============================================================
@@ -203,6 +215,15 @@ public class HideArmorScreen extends Screen {
                 int activeTabX = (activeTab == ActiveTab.ARMOR) ? contentX : contentX + tabGap;
                 ctx.fill(activeTabX, py + 8 + 22 + 3, activeTabX + 22, py + 8 + 22 + 5, 0xFFFFFFFF);
                 ctx.drawText(this.textRenderer, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
+
+                if (activeTab == ActiveTab.ARMOR && this.isWGFMLoaded && this.chestplateSlider != null
+                                && (this.chestplateSlider.isHovered() || this.chestplateSlider.isFocused())) {
+                        int warnY = py + SLIDER_TOP + SPACING * 4 - 2;
+                        ctx.drawText(this.textRenderer, "! WGFM Breast Armor only supports", contentX, warnY,
+                                        0xFFFFAA00, false);
+                        ctx.drawText(this.textRenderer, "  0% (hide) or >0% (visible)", contentX, warnY + 10,
+                                        0xFFFFAA00, false);
+                }
 
                 // Item icons next to sliders
                 for (IconInfo info : sliderIcons) {

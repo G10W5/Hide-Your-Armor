@@ -9,7 +9,7 @@
   "gui.hidearmor.chestplate": "Chestplate Opacity",
   "gui.hidearmor.leggings": "Leggings Opacity",
   "gui.hidearmor.boots": "Boots Opacity",
-  "gui.hidearmor.shield": "Offhand Opacity",
-  "gui.hidearmor.offhand": "Offhand Opacity",
+  "gui.hidearmor.shield": "Shield Visibility",
+  "gui.hidearmor.offhand": "Shield Visibility",
   "gui.hidearmor.opacity": "%d%%"
 }

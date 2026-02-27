@@ -1,33 +1,40 @@
-# HideArmorMod (Minecraft 1.21.11)
+# HideArmorMod (v1.6.4)
 
-A sleek and lightweight Fabric mod for Minecraft 1.21.11 that allows you to hide armor and off-hand shields individually through a custom GUI.
+A premium, highly customizable Fabric mod for Minecraft 1.21.11 that gives you total control over the visibility and transparency of your equipment.
 
-## Features
+## ✨ Key Features
 
-- **Custom Settings GUI**: Press `H` (default) to open the settings menu.
-- **Player Preview**: See your character in real-time as you toggle visibility.
-- **Individual Armor Toggles**: Hide Helmet, Chestplate, Leggings, or Boots separately.
-- **Shield Hiding**: Toggle visibility for shields held in either hand.
-- **WGFM Support**: Full compatibility with Wildfire's Female Gender Mod.
-- **1.21.11 Native**: Built specifically for the updated rendering system in Minecraft 1.21.11.
+-   **Granular Opacity Sliders**: Don't just hide your armor—set it to any transparency from 0% to 100%. Perfect for showing off your skin while still seeing your gear.
+-   **Tabbed Interface**: Sleek, modern UI with dedicated tabs for:
+    -   **🛡️ Armor**: Individual opacity sliders for Helmet, Chestplate, Leggings, and Boots.
+    -   **🛡️ Offhand**: Full transparency support for Shields.
+-   **Special Accessory Toggles**:
+    -   **Elytra**: Quickly toggle your wings on/off without unequipped them.
+    -   **Skulls & Blocks**: Control the visibility of decorative head items.
+-   **Wildfire Female Gender Mod (WGFM) Support**: 
+    -   Industry-leading integration that applies your opacity settings to the custom breast armor layers.
+    -   Supports full invisibility and true alpha-blending transparency.
+-   **Premium UX**:
+    -   **Real-time Interaction**: The menu doesn't pause the game, allowing you to see your changes instantly in the world.
+    -   **Smooth Animations**: Sliding menu transitions and a responsive player preview model.
+    -   **HUD Optimized**: Advanced rendering fixes ensure no black artifacts when using transparent shields in first person.
 
-## Installation
+## 🎮 How to Use
 
-1. Make sure you have [Fabric Loader](https://fabricmc.net/) installed for Minecraft 1.21.11.
-2. Download the latest release from [Releases](https://github.com/your-username/HideArmorMod/releases).
-3. Place the `.jar` file in your Minecraft `mods` folder.
-4. (Optional) Install [Fabric API](https://curseforge.com/minecraft/mc-mods/fabric-api) for better compatibility.
+-   **Open Menu**: Press `H` (default) while in-game.
+-   **Adjust Visibility**: Drag sliders to set transparency or click icons to toggle specific items like Elytra.
+-   **Done**: All changes are saved instantly to your config file.
 
-## Development
+## 📥 Installation
 
-This mod is built using Gradle. To build the project locally:
+1.  Requires **Minecraft 1.21.11** and the **Fabric Loader**.
+2.  Drop the `hidearmor-v1.6.4.jar` into your `.minecraft/mods` folder.
+3.  (Highly Recommended) Install **Fabric API** for full compatibility.
 
-```bash
-./gradlew build
-```
+## 🛠️ Configuration
 
-The resulting jar will be in `build/libs/`.
+Settings are saved in `config/hidearmor.json`. You can edit this file manually if needed, though the in-game GUI is recommended.
 
-## License
+## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
