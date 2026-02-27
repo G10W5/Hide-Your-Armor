@@ -1,4 +1,4 @@
-# HideArmorMod (v1.6.4)
+# HideArmorMod (v1.3.1)
 
 A premium, highly customizable Fabric mod for Minecraft 1.21.11 that gives you total control over the visibility and transparency of your equipment.
 
