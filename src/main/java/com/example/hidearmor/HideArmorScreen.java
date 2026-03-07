@@ -142,6 +142,14 @@ public class HideArmorScreen extends Screen {
                                         config.showElytra = !config.showElytra;
                                         rebuildWidgets();
                                 }, !config.showElytra));
+                this.addDrawableChild(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 26, 26,
+                                Items.COMPASS, !config.enableMultiplayerSync,
+                                b -> {
+                                        config.enableMultiplayerSync = !config.enableMultiplayerSync;
+                                        if (config.enableMultiplayerSync)
+                                                HideArmorMod.broadcastConfig();
+                                        rebuildWidgets();
+                                }, !config.enableMultiplayerSync, "Multiplayer sync"));
 
                 // ---- Done button ----
                 this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, btn -> this.close())
@@ -264,6 +272,7 @@ public class HideArmorScreen extends Screen {
         @Override
         public void close() {
                 HideArmorMod.getConfig().save();
+                HideArmorMod.broadcastConfig();
                 super.close();
         }
 
@@ -295,6 +304,28 @@ public class HideArmorScreen extends Screen {
                                         ctx.fill(x1 + i, ry1, x1 + i + 1, ry1 + 2, 0xEEFF2222);
                                         ctx.fill(x1 + i, ry2 - 1, x1 + i + 1, ry2 + 1, 0xEEFF2222);
                                 }
+                        }
+                }
+        }
+
+        // ============================================================
+        // Tooltip Toggle Icon Button (compass / multiplayer sync)
+        // ============================================================
+        private class TooltipToggleIconButton extends ToggleIconButton {
+                private final String tooltipText;
+
+                public TooltipToggleIconButton(int x, int y, int w, int h, net.minecraft.item.Item item,
+                                boolean active, PressAction onPress, boolean showCross, String tooltipText) {
+                        super(x, y, w, h, item, active, onPress, showCross);
+                        this.tooltipText = tooltipText;
+                }
+
+                @Override
+                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                        super.drawIcon(ctx, mx, my, delta);
+                        if (isHovered()) {
+                                ctx.drawTooltip(HideArmorScreen.this.textRenderer,
+                                                net.minecraft.text.Text.literal(tooltipText), mx, my);
                         }
                 }
         }

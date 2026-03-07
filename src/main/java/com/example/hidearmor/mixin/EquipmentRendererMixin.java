@@ -1,6 +1,5 @@
 package com.example.hidearmor.mixin;
 
-import com.example.hidearmor.HideArmorMod;
 import com.example.hidearmor.LocalPlayerTracker;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -29,15 +28,19 @@ import org.spongepowered.asm.mixin.injection.At;
 public class EquipmentRendererMixin {
 
     private float getOpacity(ItemStack stack) {
-        // Only apply transparency effect to the local player
-        if (!LocalPlayerTracker.isRenderingLocalPlayer())
-            return 1.0f;
+        // Look up the config for whatever player is currently being rendered.
+        // Returns our local config for the local player, or a cached remote config for
+        // others.
+        com.example.hidearmor.ModConfig cfg = LocalPlayerTracker.getConfigForCurrentPlayer();
+        if (cfg == null)
+            return 1.0f; // no config received for this player — show fully visible
+
         if (stack == null || stack.isEmpty())
             return 1.0f;
 
         // Handle Shield/offhand specifically
         if (stack.isOf(Items.SHIELD)) {
-            return HideArmorMod.getShieldOpacity();
+            return cfg.shieldOpacity;
         }
 
         EquippableComponent equippable = stack.get(DataComponentTypes.EQUIPPABLE);
@@ -49,15 +52,15 @@ public class EquipmentRendererMixin {
 
         switch (slot) {
             case HEAD:
-                return HideArmorMod.getHelmetOpacity();
+                return cfg.helmetOpacity;
             case CHEST:
-                return HideArmorMod.getChestplateOpacity();
+                return cfg.chestplateOpacity;
             case LEGS:
-                return HideArmorMod.getLeggingsOpacity();
+                return cfg.leggingsOpacity;
             case FEET:
-                return HideArmorMod.getBootsOpacity();
+                return cfg.bootsOpacity;
             case OFFHAND:
-                return HideArmorMod.getShieldOpacity();
+                return cfg.shieldOpacity;
             default:
                 return 1.0f;
         }

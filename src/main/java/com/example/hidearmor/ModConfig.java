@@ -19,9 +19,10 @@ public class ModConfig {
     public float leggingsOpacity = 1.0f;
     public float bootsOpacity = 1.0f;
     public float shieldOpacity = 1.0f;
-    // Toggle visiblity for special items
+    // Toggle visibility for special items
     public boolean showElytra = true;
     public boolean showSkullsAndBlocks = true;
+    public boolean enableMultiplayerSync = true;
 
     public void save() {
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
