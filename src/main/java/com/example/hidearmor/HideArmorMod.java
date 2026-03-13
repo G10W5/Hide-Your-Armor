@@ -19,6 +19,8 @@ public class HideArmorMod implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        // Dummy.test();
+
         config = ModConfig.load();
 
         // --- Payload registration (must happen before any networking) ---

@@ -10,6 +10,7 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +24,13 @@ public class HideArmorScreen extends Screen {
 
         // Panel layout constants
         private static final int PANEL_W = 400;
-        private static final int PANEL_H = 250;
+        private static final int PANEL_H = 260;
         private static final int LEFT_W = 215;
         private static final int SLIDER_W = 152;
         private static final int SPACING = 24;
         private static final int SLIDER_TOP = 42;
-        private static final int TOGGLE_TOP = 150;
-        private static final int ICON_TOP = 162;
+        private static final int TOGGLE_TOP = 166;
+        private static final int ICON_TOP = 178;
         private static final int DONE_TOP = PANEL_H - 26;
 
         // Open animation: slides up from below + fades in
@@ -39,7 +40,8 @@ public class HideArmorScreen extends Screen {
 
         private PlayerPreviewWidget previewWidget;
         private net.minecraft.client.gui.widget.ClickableWidget chestplateSlider;
-        private final boolean isWGFMLoaded = FabricLoader.getInstance().isModLoaded("wildfire_gender");
+        private final boolean isWGFMLoaded = FabricLoader.getInstance().isModLoaded("wildfire_gender") || FabricLoader.getInstance().isModLoaded("wildfire-gender");
+        private static final Identifier BG_TEXTURE = Identifier.of("hidearmor", "textures/gui/bg.png");
 
         // Item icons drawn next to each slider (cleared on every rebuildWidgets)
         private record IconInfo(net.minecraft.item.Item item, int x, int y) {
@@ -111,9 +113,10 @@ public class HideArmorScreen extends Screen {
                 if (activeTab == ActiveTab.ARMOR) {
                         addSlider(sliderX, iconX, sliderY, "gui.hidearmor.helmet", Items.DIAMOND_HELMET,
                                         config.helmetOpacity, v -> config.helmetOpacity = v.floatValue());
-                        this.chestplateSlider = addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
+                        addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
                                         Items.DIAMOND_CHESTPLATE, config.chestplateOpacity,
                                         v -> config.chestplateOpacity = v.floatValue());
+                        this.chestplateSlider = (net.minecraft.client.gui.widget.ClickableWidget) this.children().get(this.children().size() - 1);
                         addSlider(sliderX, iconX, sliderY + SPACING * 2, "gui.hidearmor.leggings",
                                         Items.DIAMOND_LEGGINGS, config.leggingsOpacity,
                                         v -> config.leggingsOpacity = v.floatValue());
@@ -226,11 +229,8 @@ public class HideArmorScreen extends Screen {
 
                 if (activeTab == ActiveTab.ARMOR && this.isWGFMLoaded && this.chestplateSlider != null
                                 && (this.chestplateSlider.isHovered() || this.chestplateSlider.isFocused())) {
-                        int warnY = py + SLIDER_TOP + SPACING * 4 - 2;
-                        ctx.drawText(this.textRenderer, "! WGFM Breast Armor only supports", contentX, warnY,
-                                        0xFFFFAA00, false);
-                        ctx.drawText(this.textRenderer, "  0% (hide) or >0% (visible)", contentX, warnY + 10,
-                                        0xFFFFAA00, false);
+                        ctx.drawTextWithShadow(this.textRenderer, "! WGFM Breast Armor only supports", contentX, py + 135, 0xFFFFFF00);
+                        ctx.drawTextWithShadow(this.textRenderer, "0% (hide) or >0% (visible)", contentX, py + 145, 0xFFFFFF00);
                 }
 
                 // Item icons next to sliders
@@ -243,19 +243,22 @@ public class HideArmorScreen extends Screen {
 
         private void drawPanel(DrawContext ctx, float anim) {
                 int px = px(), py = py();
-                int alpha = (int) (anim * 240);
+                int alpha = (int) (anim * 255);
 
-                // Primary panel fill - dark layered gradient for a premium look
-                // Layer 1: deep dark base
-                ctx.fill(px, py, px + PANEL_W, py + PANEL_H, (alpha << 24) | 0x0A0B10);
-                // Layer 2: subtle left-side lighter strip for depth
-                ctx.fill(px, py, px + LEFT_W, py + PANEL_H, 0x18FFFFFF);
-                // Layer 3: right-side preview area slightly different
-                ctx.fill(px + LEFT_W + 1, py, px + PANEL_W, py + PANEL_H, 0x10000000);
+                // Draw the custom background texture (Tiled)
+                int tileSize = 64;
+                for (int ty = 0; ty < PANEL_H; ty += tileSize) {
+                        for (int tx = 0; tx < PANEL_W; tx += tileSize) {
+                                int tw = Math.min(tileSize, PANEL_W - tx);
+                                int th = Math.min(tileSize, PANEL_H - ty);
+                                ctx.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, BG_TEXTURE, px + tx, py + ty, 0.0f, 0.0f, tw, th, tileSize, tileSize, 0xFFFFFFFF);
+                        }
+                }
 
-                // Subtle gradient: top brighter edge
-                ctx.fill(px, py, px + PANEL_W, py + 2, 0x20FFFFFF);
-                ctx.fill(px, py + 2, px + PANEL_W, py + 6, 0x10FFFFFF);
+                // Fade overlay tied to animation alpha
+                if (alpha < 255) {
+                        ctx.fill(px, py, px + PANEL_W, py + PANEL_H, ((255 - alpha) << 24) | 0x000000);
+                }
 
                 // Border
                 int borderAlpha = (int) (anim * 200);

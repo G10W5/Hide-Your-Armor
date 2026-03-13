@@ -29,7 +29,7 @@ public class PlayerPreviewWidget extends ClickableWidget {
 
         // Draw background
         context.fill(this.getX(), renderY, this.getX() + this.getWidth(), renderY + this.getHeight(),
-                0x60000000);
+                0xFF000000);
 
         // Draw border manually
         int x = this.getX();

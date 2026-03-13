@@ -1,0 +1,15 @@
+{
+  "key.hidearmor.toggle": "Toggle Armor Visibility",
+  "category.hidearmor": "Hide Armor Mod",
+  "message.hidearmor.status": "Armor visibility: %s",
+  "message.hidearmor.hidden": "Hidden",
+  "message.hidearmor.visible": "Visible",
+  "gui.hidearmor.title": "Hide Armor Settings",
+  "gui.hidearmor.helmet": "Helmet Opacity",
+  "gui.hidearmor.chestplate": "Chestplate Opacity",
+  "gui.hidearmor.leggings": "Leggings Opacity",
+  "gui.hidearmor.boots": "Boots Opacity",
+  "gui.hidearmor.shield": "Shield Visibility",
+  "gui.hidearmor.offhand": "Shield Visibility",
+  "gui.hidearmor.opacity": "%d%%"
+}

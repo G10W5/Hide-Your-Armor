@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"package": "com.example.hidearmor.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"mixins": [
+		"EquipmentRendererMixin",
+		"HeldItemRendererMixin",
+		"ElytraFeatureRendererMixin",
+		"HeadFeatureRendererMixin",
+		"PlayerRendererMixin",
+		"WGFMGenderLayerMixin",
+		"WGFMGenderArmorLayerMixin",
+		"ShieldModelRendererMixin",
+		"ShieldEntityModelMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
