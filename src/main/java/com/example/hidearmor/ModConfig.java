@@ -23,6 +23,16 @@ public class ModConfig {
     public boolean showElytra = true;
     public boolean showSkullsAndBlocks = true;
     public boolean enableMultiplayerSync = true;
+    
+    // Enchantment Glint toggles
+    public boolean showGlintHelmet = true;
+    public boolean showGlintChestplate = true;
+    public boolean showGlintLeggings = true;
+    public boolean showGlintBoots = true;
+    public boolean showGlintShield = true;
+
+    // UI Theme
+    public String uiTheme = "Sleek"; // "Cobblestone" or "Sleek"
 
     public void save() {
         try (FileWriter writer = new FileWriter(CONFIG_FILE)) {

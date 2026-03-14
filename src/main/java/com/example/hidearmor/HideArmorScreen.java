@@ -23,15 +23,15 @@ public class HideArmorScreen extends Screen {
         private ActiveTab activeTab = ActiveTab.ARMOR;
 
         // Panel layout constants
-        private static final int PANEL_W = 400;
-        private static final int PANEL_H = 260;
-        private static final int LEFT_W = 215;
-        private static final int SLIDER_W = 152;
+        private static final int PANEL_W = 340;
+        private static final int PANEL_H = 220;
+        private static final int LEFT_W = 195;
+        private static final int SLIDER_W = 130;
         private static final int SPACING = 24;
-        private static final int SLIDER_TOP = 42;
-        private static final int TOGGLE_TOP = 166;
-        private static final int ICON_TOP = 178;
-        private static final int DONE_TOP = PANEL_H - 26;
+        private static final int SLIDER_TOP = 40;
+        private static final int TOGGLE_TOP = 145;
+        private static final int ICON_TOP = 157;
+        private static final int DONE_TOP = PANEL_H - 24;
 
         // Open animation: slides up from below + fades in
         private long openTime = -1;
@@ -48,6 +48,11 @@ public class HideArmorScreen extends Screen {
         }
 
         private final List<IconInfo> sliderIcons = new ArrayList<>();
+
+        // Glint toggle info for rendering
+        private record GlintToggleInfo(int x, int y, boolean enabled) {
+        }
+        private final List<GlintToggleInfo> glintToggles = new ArrayList<>();
 
         public HideArmorScreen(Screen parent) {
                 super(Text.translatable("gui.hidearmor.title"));
@@ -87,41 +92,62 @@ public class HideArmorScreen extends Screen {
         private void rebuildWidgets() {
                 this.clearChildren();
                 sliderIcons.clear();
+                glintToggles.clear();
 
                 ModConfig config = HideArmorMod.getConfig();
                 int px = px(), py = py();
-                int contentX = px + 18;
+                int contentX = px + 10;
 
                 // ---- Tab buttons ----
                 int tabW = 22, tabGap = 26;
-                this.addDrawableChild(new ToggleIconButton(contentX, py + 8, tabW, tabW, Items.IRON_CHESTPLATE,
+                this.addDrawableChild(new ToggleIconButton(contentX, py + 6, tabW, tabW, Items.IRON_CHESTPLATE,
                                 activeTab == ActiveTab.ARMOR, b -> {
                                         activeTab = ActiveTab.ARMOR;
                                         rebuildWidgets();
                                 }, false));
-                this.addDrawableChild(new ToggleIconButton(contentX + tabGap, py + 8, tabW, tabW, Items.SHIELD,
+                this.addDrawableChild(new ToggleIconButton(contentX + tabGap, py + 6, tabW, tabW, Items.SHIELD,
                                 activeTab == ActiveTab.OFFHAND, b -> {
                                         activeTab = ActiveTab.OFFHAND;
                                         rebuildWidgets();
                                 }, false));
 
                 // ---- Sliders ----
-                int sliderX = contentX + 22;
+                int sliderX = contentX + 20;
                 int iconX = contentX + 2;
                 int sliderY = py + SLIDER_TOP;
+                int glintBtnX = sliderX + SLIDER_W + 4;
 
                 if (activeTab == ActiveTab.ARMOR) {
                         addSlider(sliderX, iconX, sliderY, "gui.hidearmor.helmet", Items.DIAMOND_HELMET,
                                         config.helmetOpacity, v -> config.helmetOpacity = v.floatValue());
+                        addGlintToggle(glintBtnX, sliderY, config.showGlintHelmet, b -> {
+                                config.showGlintHelmet = !config.showGlintHelmet;
+                                rebuildWidgets();
+                        });
+
                         addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
                                         Items.DIAMOND_CHESTPLATE, config.chestplateOpacity,
                                         v -> config.chestplateOpacity = v.floatValue());
                         this.chestplateSlider = (net.minecraft.client.gui.widget.ClickableWidget) this.children().get(this.children().size() - 1);
+                        addGlintToggle(glintBtnX, sliderY + SPACING, config.showGlintChestplate, b -> {
+                                config.showGlintChestplate = !config.showGlintChestplate;
+                                rebuildWidgets();
+                        });
+
                         addSlider(sliderX, iconX, sliderY + SPACING * 2, "gui.hidearmor.leggings",
                                         Items.DIAMOND_LEGGINGS, config.leggingsOpacity,
                                         v -> config.leggingsOpacity = v.floatValue());
+                        addGlintToggle(glintBtnX, sliderY + SPACING * 2, config.showGlintLeggings, b -> {
+                                config.showGlintLeggings = !config.showGlintLeggings;
+                                rebuildWidgets();
+                        });
+
                         addSlider(sliderX, iconX, sliderY + SPACING * 3, "gui.hidearmor.boots", Items.DIAMOND_BOOTS,
                                         config.bootsOpacity, v -> config.bootsOpacity = v.floatValue());
+                        addGlintToggle(glintBtnX, sliderY + SPACING * 3, config.showGlintBoots, b -> {
+                                config.showGlintBoots = !config.showGlintBoots;
+                                rebuildWidgets();
+                        });
                 } else {
                         String btnText = Text.translatable("gui.hidearmor.shield").getString() + ": "
                                         + (config.shieldOpacity > 0.5f ? "ON" : "OFF");
@@ -130,22 +156,26 @@ public class HideArmorScreen extends Screen {
                                 rebuildWidgets();
                         }).dimensions(sliderX, sliderY, SLIDER_W, 20).build());
                         sliderIcons.add(new IconInfo(Items.SHIELD, iconX, sliderY + 2));
+                        addGlintToggle(glintBtnX, sliderY, config.showGlintShield, b -> {
+                                config.showGlintShield = !config.showGlintShield;
+                                rebuildWidgets();
+                        });
                 }
 
                 // ---- Visibility toggles ----
                 int iconY = py + ICON_TOP;
-                int iconGap = 30;
-                this.addDrawableChild(new ToggleIconButton(contentX, iconY, 26, 26, Items.SKELETON_SKULL,
+                int iconGap = 28;
+                this.addDrawableChild(new ToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
                                 !config.showSkullsAndBlocks, b -> {
                                         config.showSkullsAndBlocks = !config.showSkullsAndBlocks;
                                         rebuildWidgets();
                                 }, !config.showSkullsAndBlocks));
-                this.addDrawableChild(new ToggleIconButton(contentX + iconGap, iconY, 26, 26, Items.ELYTRA,
+                this.addDrawableChild(new ToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
                                 !config.showElytra, b -> {
                                         config.showElytra = !config.showElytra;
                                         rebuildWidgets();
                                 }, !config.showElytra));
-                this.addDrawableChild(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 26, 26,
+                this.addDrawableChild(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 24, 24,
                                 Items.COMPASS, !config.enableMultiplayerSync,
                                 b -> {
                                         config.enableMultiplayerSync = !config.enableMultiplayerSync;
@@ -156,16 +186,23 @@ public class HideArmorScreen extends Screen {
 
                 // ---- Done button ----
                 this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, btn -> this.close())
-                                .dimensions(px + 12, py + DONE_TOP, 70, 20).build());
+                                .dimensions(px + 8, py + DONE_TOP, 60, 20).build());
 
                 // ---- Player preview ----
                 int rightW = PANEL_W - LEFT_W;
-                int previewW = 130, previewH = 200;
+                int previewW = rightW - 16, previewH = PANEL_H - 16;
                 this.previewWidget = new PlayerPreviewWidget(
-                                px + LEFT_W + (rightW - previewW) / 2,
-                                py + (PANEL_H - previewH) / 2,
+                                px + LEFT_W + 8,
+                                py + 8,
                                 previewW, previewH);
                 this.addDrawableChild(this.previewWidget);
+        }
+
+        private void addGlintToggle(int x, int y, boolean currentState, ButtonWidget.PressAction onPress) {
+                net.minecraft.item.Item icon = currentState ? Items.ENCHANTED_BOOK : Items.BOOK;
+                ToggleIconButton btn = new ToggleIconButton(x, y, 20, 20, icon, currentState, onPress, !currentState);
+                this.addDrawableChild(btn);
+                glintToggles.add(new GlintToggleInfo(x, y, currentState));
         }
 
         private net.minecraft.client.gui.widget.ClickableWidget addSlider(int sliderX, int iconX, int sliderY,
@@ -221,16 +258,26 @@ public class HideArmorScreen extends Screen {
 
                 // Post-child decorations (on top of sliders)
                 int px = px(), py = py();
-                int contentX = px + 18;
+                int contentX = px + 10;
                 int tabGap = 26;
                 int activeTabX = (activeTab == ActiveTab.ARMOR) ? contentX : contentX + tabGap;
-                ctx.fill(activeTabX, py + 8 + 22 + 3, activeTabX + 22, py + 8 + 22 + 5, 0xFFFFFFFF);
+
+                // Active tab underline
+                ctx.fill(activeTabX, py + 6 + 22 + 2, activeTabX + 22, py + 6 + 22 + 3, 0xFFFFFFFF);
+
+                // "Visibility" label
                 ctx.drawText(this.textRenderer, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
 
+                // "Glint" column header (centered above the toggle buttons)
+                if (activeTab == ActiveTab.ARMOR) {
+                        int glintHeaderX = contentX + 20 + SLIDER_W + 6;
+                        ctx.drawText(this.textRenderer, "Glint", glintHeaderX, py + 30, 0xFF777777, false);
+                }
+
+                // WGFM contextual warning
                 if (activeTab == ActiveTab.ARMOR && this.isWGFMLoaded && this.chestplateSlider != null
                                 && (this.chestplateSlider.isHovered() || this.chestplateSlider.isFocused())) {
-                        ctx.drawTextWithShadow(this.textRenderer, "! WGFM Breast Armor only supports", contentX, py + 135, 0xFFFFFF00);
-                        ctx.drawTextWithShadow(this.textRenderer, "0% (hide) or >0% (visible)", contentX, py + 145, 0xFFFFFF00);
+                        ctx.drawTextWithShadow(this.textRenderer, "! WGFM Breast Armor: 0% or >0% only", contentX, py + SLIDER_TOP + SPACING + 22, 0xFFFFFF00);
                 }
 
                 // Item icons next to sliders
@@ -244,32 +291,85 @@ public class HideArmorScreen extends Screen {
         private void drawPanel(DrawContext ctx, float anim) {
                 int px = px(), py = py();
                 int alpha = (int) (anim * 255);
+                ModConfig config = HideArmorMod.getConfig();
+                boolean isSleek = "Sleek".equalsIgnoreCase(config.uiTheme);
 
-                // Draw the custom background texture (Tiled)
-                int tileSize = 64;
-                for (int ty = 0; ty < PANEL_H; ty += tileSize) {
-                        for (int tx = 0; tx < PANEL_W; tx += tileSize) {
-                                int tw = Math.min(tileSize, PANEL_W - tx);
-                                int th = Math.min(tileSize, PANEL_H - ty);
-                                ctx.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, BG_TEXTURE, px + tx, py + ty, 0.0f, 0.0f, tw, th, tileSize, tileSize, 0xFFFFFFFF);
+                if (isSleek) {
+                        // ---- Sleek Theme: Minecraft-style beveled border ----
+
+                        // Main background (dark charcoal, like MC inventory)
+                        ctx.fill(px, py, px + PANEL_W, py + PANEL_H, 0xFF1A1A1E);
+
+                        // MC-style beveled border (outer)
+                        // Top edge - light
+                        ctx.fill(px, py, px + PANEL_W, py + 2, 0xFFFFFFFF);
+                        // Left edge - light
+                        ctx.fill(px, py, px + 2, py + PANEL_H, 0xFFFFFFFF);
+                        // Bottom edge - dark shadow
+                        ctx.fill(px, py + PANEL_H - 2, px + PANEL_W, py + PANEL_H, 0xFF373737);
+                        // Right edge - dark shadow
+                        ctx.fill(px + PANEL_W - 2, py, px + PANEL_W, py + PANEL_H, 0xFF373737);
+
+                        // MC-style beveled border (inner bevel)
+                        // Top inner - slightly darker than white
+                        ctx.fill(px + 2, py + 2, px + PANEL_W - 2, py + 3, 0xFFC6C6C6);
+                        // Left inner
+                        ctx.fill(px + 2, py + 2, px + 3, py + PANEL_H - 2, 0xFFC6C6C6);
+                        // Bottom inner - lighter shadow
+                        ctx.fill(px + 2, py + PANEL_H - 3, px + PANEL_W - 2, py + PANEL_H - 2, 0xFF8B8B8B);
+                        // Right inner
+                        ctx.fill(px + PANEL_W - 3, py + 2, px + PANEL_W - 2, py + PANEL_H - 2, 0xFF8B8B8B);
+
+                        // Inner panel fill (dark grey like MC containers)
+                        ctx.fill(px + 3, py + 3, px + PANEL_W - 3, py + PANEL_H - 3, 0xFF2D2D2D);
+
+                        // Horizontal separator under tabs
+                        ctx.fill(px + 6, py + 34, px + LEFT_W - 6, py + 35, 0xFF4A4A54);
+
+                        // Inset backgrounds for each slider row (darker recessed slots)
+                        int sliderY = py + SLIDER_TOP;
+                        int sliderX = px + 10 + 20;
+                        for (int i = 0; i < 4; i++) {
+                                int rowY = sliderY + SPACING * i;
+                                // Inset shadow (top-left darker, bottom-right lighter)
+                                ctx.fill(sliderX - 2, rowY - 1, sliderX + SLIDER_W + 2, rowY + 21, 0xFF191919);
+                                ctx.fill(sliderX - 1, rowY, sliderX + SLIDER_W + 1, rowY + 20, 0xFF222222);
                         }
+
+                        // Horizontal separator above visibility section
+                        ctx.fill(px + 6, py + TOGGLE_TOP - 5, px + LEFT_W - 6, py + TOGGLE_TOP - 4, 0xFF4A4A54);
+
+                        // Vertical divider between left pane and player preview (recessed)
+                        ctx.fill(px + LEFT_W - 1, py + 4, px + LEFT_W, py + PANEL_H - 4, 0xFF191919);
+                        ctx.fill(px + LEFT_W, py + 4, px + LEFT_W + 1, py + PANEL_H - 4, 0xFF4A4A54);
+
+                } else {
+                        // ---- Cobblestone Theme: tiled texture ----
+                        int tileSize = 64;
+                        for (int ty = 0; ty < PANEL_H; ty += tileSize) {
+                                for (int tx = 0; tx < PANEL_W; tx += tileSize) {
+                                        int tw = Math.min(tileSize, PANEL_W - tx);
+                                        int th = Math.min(tileSize, PANEL_H - ty);
+                                        ctx.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, BG_TEXTURE, px + tx, py + ty, 0.0f, 0.0f, tw, th, tileSize, tileSize, 0xFFFFFFFF);
+                                }
+                        }
+
+                        // Border
+                        int borderAlpha = (int) (anim * 200);
+                        int borderColor = (borderAlpha << 24) | 0xA0A0A0;
+                        ctx.fill(px, py, px + PANEL_W, py + 1, borderColor);
+                        ctx.fill(px, py + PANEL_H - 1, px + PANEL_W, py + PANEL_H, borderColor);
+                        ctx.fill(px, py, px + 1, py + PANEL_H, borderColor);
+                        ctx.fill(px + PANEL_W - 1, py, px + PANEL_W, py + PANEL_H, borderColor);
+
+                        // Vertical divider
+                        ctx.fill(px + LEFT_W, py + 5, px + LEFT_W + 1, py + PANEL_H - 5, 0xFF404050);
                 }
 
                 // Fade overlay tied to animation alpha
                 if (alpha < 255) {
                         ctx.fill(px, py, px + PANEL_W, py + PANEL_H, ((255 - alpha) << 24) | 0x000000);
                 }
-
-                // Border
-                int borderAlpha = (int) (anim * 200);
-                int borderColor = (borderAlpha << 24) | 0xA0A0A0;
-                ctx.fill(px, py, px + PANEL_W, py + 1, borderColor);
-                ctx.fill(px, py + PANEL_H - 1, px + PANEL_W, py + PANEL_H, borderColor);
-                ctx.fill(px, py, px + 1, py + PANEL_H, borderColor);
-                ctx.fill(px + PANEL_W - 1, py, px + PANEL_W, py + PANEL_H, borderColor);
-
-                // Vertical divider
-                ctx.fill(px + LEFT_W, py + 5, px + LEFT_W + 1, py + PANEL_H - 5, 0xFF404050);
         }
 
         @Override

@@ -28,17 +28,13 @@ import org.spongepowered.asm.mixin.injection.At;
 public class EquipmentRendererMixin {
 
     private float getOpacity(ItemStack stack) {
-        // Look up the config for whatever player is currently being rendered.
-        // Returns our local config for the local player, or a cached remote config for
-        // others.
         com.example.hidearmor.ModConfig cfg = LocalPlayerTracker.getConfigForCurrentPlayer();
         if (cfg == null)
-            return 1.0f; // no config received for this player — show fully visible
+            return 1.0f;
 
         if (stack == null || stack.isEmpty())
             return 1.0f;
 
-        // Handle Shield/offhand specifically
         if (stack.isOf(Items.SHIELD)) {
             return cfg.shieldOpacity;
         }
@@ -63,6 +59,41 @@ public class EquipmentRendererMixin {
                 return cfg.shieldOpacity;
             default:
                 return 1.0f;
+        }
+    }
+
+    private boolean getShowGlint(ItemStack stack) {
+        com.example.hidearmor.ModConfig cfg = LocalPlayerTracker.getConfigForCurrentPlayer();
+        if (cfg == null)
+            return true;
+
+        if (stack == null || stack.isEmpty())
+            return true;
+
+        if (stack.isOf(Items.SHIELD)) {
+            return cfg.showGlintShield;
+        }
+
+        EquippableComponent equippable = stack.get(DataComponentTypes.EQUIPPABLE);
+        if (equippable == null)
+            return true;
+        EquipmentSlot slot = equippable.slot();
+        if (slot == null)
+            return true;
+
+        switch (slot) {
+            case HEAD:
+                return cfg.showGlintHelmet;
+            case CHEST:
+                return cfg.showGlintChestplate;
+            case LEGS:
+                return cfg.showGlintLeggings;
+            case FEET:
+                return cfg.showGlintBoots;
+            case OFFHAND:
+                return cfg.showGlintShield;
+            default:
+                return true;
         }
     }
 
@@ -98,6 +129,13 @@ public class EquipmentRendererMixin {
         float opacity = getOpacity(stack);
         if (opacity <= 0.0f)
             return; // invisible
+
+        // Check if this is a glint layer call — skip if glint is disabled
+        // The glint RenderLayer name typically contains "glint"
+        String layerName = layer.toString();
+        if (layerName.contains("glint") && !getShowGlint(stack)) {
+            return; // suppress glint rendering
+        }
 
         // Skip inner layer for translucent chestplate to avoid breast-area artifacts
         if (opacity < 1.0f && layerType == EquipmentModel.LayerType.HUMANOID_LEGGINGS) {
