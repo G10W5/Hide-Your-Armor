@@ -9,7 +9,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -39,8 +38,6 @@ public class HideArmorScreen extends Screen {
         private static final float ANIM_MS = 380f;
 
         private PlayerPreviewWidget previewWidget;
-        private net.minecraft.client.gui.widget.ClickableWidget chestplateSlider;
-        private final boolean isWGFMLoaded = FabricLoader.getInstance().isModLoaded("wildfire_gender") || FabricLoader.getInstance().isModLoaded("wildfire-gender");
         private static final Identifier BG_TEXTURE = Identifier.of("hidearmor", "textures/gui/bg.png");
 
         // Item icons drawn next to each slider (cleared on every rebuildWidgets)
@@ -128,7 +125,6 @@ public class HideArmorScreen extends Screen {
                         addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.chestplate",
                                         Items.DIAMOND_CHESTPLATE, config.chestplateOpacity,
                                         v -> config.chestplateOpacity = v.floatValue());
-                        this.chestplateSlider = (net.minecraft.client.gui.widget.ClickableWidget) this.children().get(this.children().size() - 1);
                         addGlintToggle(glintBtnX, sliderY + SPACING, config.showGlintChestplate, b -> {
                                 config.showGlintChestplate = !config.showGlintChestplate;
                                 rebuildWidgets();
@@ -180,7 +176,7 @@ public class HideArmorScreen extends Screen {
                                 b -> {
                                         config.enableMultiplayerSync = !config.enableMultiplayerSync;
                                         if (config.enableMultiplayerSync)
-                                                HideArmorMod.broadcastConfig();
+                                                HideArmorClient.broadcastConfig();
                                         rebuildWidgets();
                                 }, !config.enableMultiplayerSync, "Multiplayer sync"));
 
@@ -274,11 +270,6 @@ public class HideArmorScreen extends Screen {
                         ctx.drawText(this.textRenderer, "Glint", glintHeaderX, py + 30, 0xFF777777, false);
                 }
 
-                // WGFM contextual warning
-                if (activeTab == ActiveTab.ARMOR && this.isWGFMLoaded && this.chestplateSlider != null
-                                && (this.chestplateSlider.isHovered() || this.chestplateSlider.isFocused())) {
-                        ctx.drawTextWithShadow(this.textRenderer, "! WGFM Breast Armor: 0% or >0% only", contentX, py + SLIDER_TOP + SPACING + 22, 0xFFFFFF00);
-                }
 
                 // Item icons next to sliders
                 for (IconInfo info : sliderIcons) {
@@ -375,7 +366,7 @@ public class HideArmorScreen extends Screen {
         @Override
         public void close() {
                 HideArmorMod.getConfig().save();
-                HideArmorMod.broadcastConfig();
+                HideArmorClient.broadcastConfig();
                 super.close();
         }
 

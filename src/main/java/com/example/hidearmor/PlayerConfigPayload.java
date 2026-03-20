@@ -21,7 +21,12 @@ public record PlayerConfigPayload(
         float bootsOpacity,
         float shieldOpacity,
         boolean showElytra,
-        boolean showSkullsAndBlocks) implements CustomPayload {
+        boolean showSkullsAndBlocks,
+        boolean showGlintHelmet,
+        boolean showGlintChestplate,
+        boolean showGlintLeggings,
+        boolean showGlintBoots,
+        boolean showGlintShield) implements CustomPayload {
 
     public static final CustomPayload.Id<PlayerConfigPayload> ID = new CustomPayload.Id<>(
             Identifier.of("hidearmor", "sync"));
@@ -38,6 +43,11 @@ public record PlayerConfigPayload(
         buf.writeFloat(payload.shieldOpacity);
         buf.writeBoolean(payload.showElytra);
         buf.writeBoolean(payload.showSkullsAndBlocks);
+        buf.writeBoolean(payload.showGlintHelmet);
+        buf.writeBoolean(payload.showGlintChestplate);
+        buf.writeBoolean(payload.showGlintLeggings);
+        buf.writeBoolean(payload.showGlintBoots);
+        buf.writeBoolean(payload.showGlintShield);
     }
 
     private static PlayerConfigPayload decode(PacketByteBuf buf) {
@@ -48,6 +58,11 @@ public record PlayerConfigPayload(
                 buf.readFloat(),
                 buf.readFloat(),
                 buf.readFloat(),
+                buf.readBoolean(),
+                buf.readBoolean(),
+                buf.readBoolean(),
+                buf.readBoolean(),
+                buf.readBoolean(),
                 buf.readBoolean(),
                 buf.readBoolean());
     }
@@ -62,7 +77,12 @@ public record PlayerConfigPayload(
                 config.bootsOpacity,
                 config.shieldOpacity,
                 config.showElytra,
-                config.showSkullsAndBlocks);
+                config.showSkullsAndBlocks,
+                config.showGlintHelmet,
+                config.showGlintChestplate,
+                config.showGlintLeggings,
+                config.showGlintBoots,
+                config.showGlintShield);
     }
 
     /** Convert this payload into a ModConfig snapshot. */
@@ -75,6 +95,11 @@ public record PlayerConfigPayload(
         cfg.shieldOpacity = this.shieldOpacity;
         cfg.showElytra = this.showElytra;
         cfg.showSkullsAndBlocks = this.showSkullsAndBlocks;
+        cfg.showGlintHelmet = this.showGlintHelmet;
+        cfg.showGlintChestplate = this.showGlintChestplate;
+        cfg.showGlintLeggings = this.showGlintLeggings;
+        cfg.showGlintBoots = this.showGlintBoots;
+        cfg.showGlintShield = this.showGlintShield;
         return cfg;
     }
 

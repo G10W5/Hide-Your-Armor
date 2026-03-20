@@ -14,10 +14,12 @@
     },
     "license": "MIT",
     "icon": "assets/hidearmor/icon.png",
-    "environment": "client",
     "entrypoints": {
-        "client": [
+        "main": [
             "com.example.hidearmor.HideArmorMod"
+        ],
+        "client": [
+            "com.example.hidearmor.HideArmorClient"
         ]
     },
     "mixins": [

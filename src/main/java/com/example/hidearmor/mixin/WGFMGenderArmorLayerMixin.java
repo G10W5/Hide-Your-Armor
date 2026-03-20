@@ -82,4 +82,16 @@ public class WGFMGenderArmorLayerMixin {
         }
         return originalLayer;
     }
+
+    /**
+     * Suppress glint on breast armor if toggled off in config.
+     */
+    @Inject(method = "renderGlint", at = @At("HEAD"), cancellable = true, remap = false)
+    private void onRenderGlint(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        if (!LocalPlayerTracker.isRenderingLocalPlayer())
+            return;
+        if (!HideArmorMod.getConfig().showGlintChestplate) {
+            ci.cancel();
+        }
+    }
 }
