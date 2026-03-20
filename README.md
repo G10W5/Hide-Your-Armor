@@ -1,4 +1,4 @@
-# HideArmorMod (v1.4.2)
+# HideArmorMod
 
 A premium, highly customizable Fabric mod for Minecraft 1.21.11 that gives you total control over the visibility and transparency of your equipment.
 
@@ -6,8 +6,8 @@ A premium, highly customizable Fabric mod for Minecraft 1.21.11 that gives you t
 
 -   **Granular Opacity Sliders**: Don't just hide your armor — set it to any transparency from 0% to 100%.
 -   **Tabbed Interface**:
-    -   **🪖 Armor**: Individual opacity sliders for Helmet, Chestplate, Leggings, and Boots.
-    -   **🛡️ Shield**: Visibility toggle for off-hand shields.
+    -   **Armor**: Individual opacity sliders for Helmet, Chestplate, Leggings, and Boots.
+    -   **Shield**: Visibility toggle for off-hand shields.
 -   **Special Accessory Toggles**:
     -   **Elytra**: Toggle wings on/off without unequipping.
     -   **Skulls & Blocks**: Control visibility of decorative head items.
