@@ -165,16 +165,18 @@ public class HideArmorScreen extends Screen {
                 // ---- Visibility toggles ----
                 int iconY = py + ICON_TOP;
                 int iconGap = 28;
-                this.addRenderableWidget(new ToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
+                this.addRenderableWidget(new TooltipToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
                                 !config.showSkullsAndBlocks, b -> {
                                         config.showSkullsAndBlocks = !config.showSkullsAndBlocks;
                                         rebuildWidgets();
-                                }, !config.showSkullsAndBlocks));
-                this.addRenderableWidget(new ToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
+                                }, !config.showSkullsAndBlocks,
+                                Component.translatable("gui.hidearmor.tooltip.skull").getString()));
+                this.addRenderableWidget(new TooltipToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
                                 !config.showElytra, b -> {
                                         config.showElytra = !config.showElytra;
                                         rebuildWidgets();
-                                }, !config.showElytra));
+                                }, !config.showElytra,
+                                Component.translatable("gui.hidearmor.tooltip.elytra").getString()));
                 this.addRenderableWidget(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 24, 24,
                                 Items.COMPASS, !config.enableMultiplayerSync,
                                 b -> {

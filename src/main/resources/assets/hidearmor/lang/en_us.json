@@ -1,6 +1,7 @@
 {
   "key.hidearmor.toggle": "Toggle Armor Visibility",
-  "category.hidearmor": "Hide Armor Mod",
+  "key.category.hidearmor.main": "Hide Your Armor",
+  "category.hidearmor": "Hide Your Armor",
   "message.hidearmor.status": "Armor visibility: %s",
   "message.hidearmor.hidden": "Hidden",
   "message.hidearmor.visible": "Visible",
@@ -11,5 +12,7 @@
   "gui.hidearmor.boots": "Boots Opacity",
   "gui.hidearmor.shield": "Shield Visibility",
   "gui.hidearmor.offhand": "Shield Visibility",
-  "gui.hidearmor.opacity": "%d%%"
+  "gui.hidearmor.opacity": "%d%%",
+  "gui.hidearmor.tooltip.skull": "Toggle Skulls & Blocks visibility",
+  "gui.hidearmor.tooltip.elytra": "Toggle Elytra visibility"
 }
