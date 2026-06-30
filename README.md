@@ -1,57 +1,73 @@
-# HideArmorMod
+# <img src="src/main/resources/assets/hidearmor/icon.png" width="38" align="center" /> Hide Your Armor
 
-A premium, highly customizable Fabric mod for Minecraft 1.21.11 that gives you total control over the visibility and transparency of your equipment.
+<p align="center">
+  <img src="src/main/resources/assets/hidearmor/textures/gui/banner.png" alt="Hide Your Armor Banner" width="700" />
+</p>
 
-## ✨ Key Features
+<p align="center">
+  <a href="https://github.com/G10W5/Hide-Your-Armor/releases">
+    <img src="https://img.shields.io/github/v/release/G10W5/Hide-Your-Armor?style=for-the-badge&color=8A2BE2" alt="Releases" />
+  </a>
+  <a href="https://github.com/G10W5/Hide-Your-Armor/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/G10W5/Hide-Your-Armor/gradle.yml?branch=main&style=for-the-badge" alt="Build Status" />
+  </a>
+  <img src="https://img.shields.io/badge/Minecraft-26.1%20%2F%201.21.11-darkgreen?style=for-the-badge" alt="Minecraft Version" />
+  <img src="https://img.shields.io/badge/Loader-Fabric-blue?style=for-the-badge" alt="Fabric Loader" />
+</p>
 
--   **Granular Opacity Sliders**: Don't just hide your armor — set it to any transparency from 0% to 100%.
--   **Tabbed Interface**:
-    -   **Armor**: Individual opacity sliders for Helmet, Chestplate, Leggings, and Boots.
-    -   **Shield**: Visibility toggle for off-hand shields.
--   **Special Accessory Toggles**:
-    -   **Elytra**: Toggle wings on/off without unequipping.
-    -   **Skulls & Blocks**: Control visibility of decorative head items.
--   **Wildfire Female Gender Mod (WGFM) Support**:
-    -   Applies your opacity settings to WGFM's custom breast armor layers.
-    -   Set to 0% to fully hide, or anything above to keep visible.
--   **Multiplayer Sync** *(new in 1.4.0)*:
-    -   A compass icon toggle in the Visibility row lets you opt-in to sharing your settings with other players.
-    -   Other players who also have the mod installed will see your armor as you configured it.
--   **Premium UX**:
-    -   Menu doesn't pause the game — see changes in real-time.
-    -   Smooth slide-in animations and live player preview.
-    -   No black HUD artifacts on transparent shields in first-person.
+A premium, highly customizable client-side utility mod that grants complete control over the visibility, opacity, and rendering effects of your armor, accessories, and shield slots in real-time.
 
-## 🎮 How to Use
+---
 
--   **Open Menu**: Press `H` (default) while in-game.
--   **Adjust Visibility**: Drag sliders or click icons to configure each armor piece.
--   All changes are saved automatically when you close the menu.
+## 🌟 Features
 
-## 🌐 Multiplayer
+### 🎛️ Granular Opacity Sliders
+Don’t settle for binary toggles. Adjust your transparency level dynamically from **0%** (fully hidden) to **100%** (fully visible) with instant feedback in our non-pausing preview UI.
 
-Enabling the **Compass/Globe toggle** in the Visibility row broadcasts your opacity settings to other players.
+### 📑 Tabbed Interface Categories
+*   **🛡️ Armor Configuration**: Opacity controls mapped individually for Helmet, Chestplate, Leggings, and Boots.
+*   **⚔️ Off-Hand Shield Configuration**: Seamlessly toggle visibility for held shields.
 
-| Scenario | Works? |
-|---|---|
-| Single player | ✅ Always |
-| LAN (host + friends, all with mod) | ✅ Yes |
-| Dedicated server with mod installed server-side | ✅ Yes |
-| Dedicated server without server-side mod | ❌ No — settings stay local |
+### 🎭 Specialized Accessory Options
+*   **🪶 Elytra Toggle**: Hide or display wings without having to unequip them.
+*   **💀 Skulls & Blocks**: Adjust the visibility of decorative vanity head items.
+*   **🧬 WGFM (Wildfire Female Gender Mod) Support**: Transparent armor adjustments map automatically onto custom model breast armor layers. Control glint directly on custom body meshes.
 
-> [!NOTE]
-> Players without the mod always see normal, fully-visible armor. No crashes or errors occur on either side.
+### 📡 Multiplayer Synchronization
+Opt-in to broadcasting your configurations by toggling the in-game **Compass** switch. Other players running the mod will instantly view you with your customized armor opacities.
+
+---
+
+## 🎮 In-Game Controls & Interface
+
+1. **Open the Config Screen**: Press `H` (default bind) anywhere in-game.
+2. **Real-time Preview**: Modify sliders and toggles with a active side-by-side view of your avatar.
+3. **Save System**: All settings save automatically on screen closure to `config/hidearmor.json`.
+
+---
+
+## 🌐 Multiplayer Behavior Matrix
+
+| Client Setup | Server Mod Status | Synced Opacities? |
+| :--- | :--- | :---: |
+| **Singleplayer / LAN** | Local | ✅ **Yes** |
+| **Modded Server** | Mod Installed Server-side | ✅ **Yes** |
+| **Vanilla Server** | Mod Not Installed | ❌ **No (Settings stay local)** |
+
+> [!IMPORTANT]
+> Players without this mod installed will simply see standard, opaque armor models. No server conflicts, crashes, or data issues occur on vanilla setups.
+
+---
 
 ## 📥 Installation
 
-1.  Requires **Minecraft 1.21.11** and **Fabric Loader**.
-2.  Drop `hidearmor-1.4.2.jar` into your `.minecraft/mods` folder.
-3.  (Highly Recommended) Install **Fabric API** for full compatibility.
+1. Make sure you are using **Minecraft 1.21.11 / 26.1** running the **Fabric Loader**.
+2. Download the latest release `.jar` from the [Releases Tab](https://github.com/G10W5/Hide-Your-Armor/releases).
+3. Drop the file inside your `.minecraft/mods` directory.
+4. *(Optional but Recommended)* Add **Fabric API** to enable full cross-dependency features.
 
-## 🛠️ Configuration
+---
 
-Settings are saved in `config/hidearmor.json`. Use the in-game GUI for the best experience.
+## 📜 License & Credits
 
-## 📜 License
-
-MIT License.
+Distributed under the **MIT License**. Check out [LICENSE](LICENSE) for more details.

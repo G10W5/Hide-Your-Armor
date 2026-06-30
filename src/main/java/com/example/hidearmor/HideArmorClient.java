@@ -1,17 +1,17 @@
 package com.example.hidearmor;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class HideArmorClient implements ClientModInitializer {
-    public static KeyMapping toggleKey;
+    public static KeyBinding toggleKey;
 
     @Override
     public void onInitializeClient() {
@@ -26,18 +26,19 @@ public class HideArmorClient implements ClientModInitializer {
         });
 
         // --- Keybind ---
-        toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+        toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.hidearmor.toggle",
-                InputConstants.Type.KEYSYM,
+                InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
-                KeyMapping.Category.register(Identifier.fromNamespaceAndPath("hidearmor", "main"))));
+                KeyBinding.Category.create(Identifier.of("hidearmor", "main"))));
+
         // --- Keybind listener ---
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (toggleKey.consumeClick()) {
+            while (toggleKey.wasPressed()) {
                 if (client.player != null) {
-                    if (client.screen instanceof HideArmorScreen screen) {
-                        screen.onClose();
-                    } else if (client.screen == null) {
+                    if (client.currentScreen instanceof HideArmorScreen screen) {
+                        screen.close();
+                    } else if (client.currentScreen == null) {
                         client.setScreen(new HideArmorScreen(null));
                     }
                 }
@@ -49,9 +50,9 @@ public class HideArmorClient implements ClientModInitializer {
         if (HideArmorMod.getConfig() == null || !HideArmorMod.getConfig().enableMultiplayerSync)
             return;
 
-        var client = net.minecraft.client.Minecraft.getInstance();
+        var client = net.minecraft.client.MinecraftClient.getInstance();
         if (client.player == null)
             return;
-        ClientPlayNetworking.send(PlayerConfigPayload.from(client.player.getUUID(), HideArmorMod.getConfig()));
+        ClientPlayNetworking.send(PlayerConfigPayload.from(client.player.getUuid(), HideArmorMod.getConfig()));
     }
 }

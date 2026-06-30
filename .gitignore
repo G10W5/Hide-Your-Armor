@@ -18,16 +18,3 @@ logs/
 
 # MacOS
 .DS_Store
-
-# Local reference projects (not part of the mod)
-rivalmod_example/
-FemaleGenderMod-project/
-
-# Stray extracted class files from javap inspection (top-level only)
-*.class
-/net/
-/org/
-/com/
-/bin/
-/remappedSrc/
-/SearchDrawer.java

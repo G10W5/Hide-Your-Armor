@@ -3,28 +3,28 @@ package com.example.hidearmor.mixin;
 import com.example.hidearmor.LocalPlayerTracker;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.EquipmentClientInfo;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ARGB;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.TexturedRenderLayers;
+import net.minecraft.client.render.command.ModelCommandRenderer;
+import net.minecraft.client.render.command.RenderCommandQueue;
+import net.minecraft.client.render.entity.equipment.EquipmentModel;
+import net.minecraft.client.render.entity.equipment.EquipmentRenderer;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(EquipmentLayerRenderer.class)
+@Mixin(EquipmentRenderer.class)
 public class EquipmentRendererMixin {
 
     private float getOpacity(ItemStack stack) {
@@ -35,11 +35,11 @@ public class EquipmentRendererMixin {
         if (stack == null || stack.isEmpty())
             return 1.0f;
 
-        if (stack.is(Items.SHIELD)) {
+        if (stack.isOf(Items.SHIELD)) {
             return cfg.shieldOpacity;
         }
 
-        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        EquippableComponent equippable = stack.get(DataComponentTypes.EQUIPPABLE);
         if (equippable == null)
             return 1.0f;
         EquipmentSlot slot = equippable.slot();
@@ -70,11 +70,11 @@ public class EquipmentRendererMixin {
         if (stack == null || stack.isEmpty())
             return true;
 
-        if (stack.is(Items.SHIELD)) {
+        if (stack.isOf(Items.SHIELD)) {
             return cfg.showGlintShield;
         }
 
-        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        EquippableComponent equippable = stack.get(DataComponentTypes.EQUIPPABLE);
         if (equippable == null)
             return true;
         EquipmentSlot slot = equippable.slot();
@@ -97,34 +97,34 @@ public class EquipmentRendererMixin {
         }
     }
 
-    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorCutoutNoCull(Lnet/minecraft/resources/Identifier;)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
-    private RenderType modifyArmorLayer(Identifier texture, Operation<RenderType> original,
-            EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> model, Object state, ItemStack stack) {
-        RenderType layer = original.call(texture);
+    @WrapOperation(method = "render(Lnet/minecraft/client/render/entity/equipment/EquipmentModel$LayerType;Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;ILnet/minecraft/util/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/RenderLayers;armorCutoutNoCull(Lnet/minecraft/util/Identifier;)Lnet/minecraft/client/render/RenderLayer;"))
+    private RenderLayer modifyArmorLayer(Identifier texture, Operation<RenderLayer> original,
+            EquipmentModel.LayerType layerType, RegistryKey<?> asset, Model<?> model, Object state, ItemStack stack) {
+        RenderLayer layer = original.call(texture);
         float opacity = getOpacity(stack);
         if (opacity < 1.0f && opacity > 0.0f) {
-            return RenderTypes.armorTranslucent(texture);
+            return RenderLayers.armorTranslucent(texture);
         }
         return layer;
     }
 
-    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Sheets;armorTrimsSheet(Z)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
-    private RenderType modifyTrimLayer(boolean decal, Operation<RenderType> original,
-            EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> model, Object state, ItemStack stack) {
+    @WrapOperation(method = "render(Lnet/minecraft/client/render/entity/equipment/EquipmentModel$LayerType;Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;ILnet/minecraft/util/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/TexturedRenderLayers;getArmorTrims(Z)Lnet/minecraft/client/render/RenderLayer;"))
+    private RenderLayer modifyTrimLayer(boolean decal, Operation<RenderLayer> original,
+            EquipmentModel.LayerType layerType, RegistryKey<?> asset, Model<?> model, Object state, ItemStack stack) {
         float opacity = getOpacity(stack);
         if (opacity < 1.0f && opacity > 0.0f) {
-            return RenderTypes.armorTranslucent(Sheets.ARMOR_TRIMS_SHEET);
+            return RenderLayers.armorTranslucent(TexturedRenderLayers.ARMOR_TRIMS_ATLAS_TEXTURE);
         }
         return original.call(decal);
     }
 
-    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
+    @WrapOperation(method = "render(Lnet/minecraft/client/render/entity/equipment/EquipmentModel$LayerType;Lnet/minecraft/registry/RegistryKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;ILnet/minecraft/util/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/RenderCommandQueue;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IIILnet/minecraft/client/texture/Sprite;ILnet/minecraft/client/render/command/ModelCommandRenderer$CrumblingOverlayCommand;)V"))
     private <S> void injectAlphaToSubmitModel(
-            OrderedSubmitNodeCollector queue, Model<? super S> model, S state, PoseStack matrices, RenderType layer,
-            int light, int overlay, int color, TextureAtlasSprite sprite, int unknown1,
-            ModelFeatureRenderer.CrumblingOverlay crumbling,
+            RenderCommandQueue queue, Model<? super S> model, S state, MatrixStack matrices, RenderLayer layer,
+            int light, int overlay, int color, Sprite sprite, int unknown1,
+            ModelCommandRenderer.CrumblingOverlayCommand crumbling,
             Operation<Void> original,
-            EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> fallbackModel, Object fallbackState,
+            EquipmentModel.LayerType layerType, RegistryKey<?> asset, Model<?> fallbackModel, Object fallbackState,
             ItemStack stack) {
         float opacity = getOpacity(stack);
         if (opacity <= 0.0f)
@@ -138,8 +138,8 @@ public class EquipmentRendererMixin {
         }
 
         // Skip inner layer for translucent chestplate to avoid breast-area artifacts
-        if (opacity < 1.0f && layerType == EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS) {
-            Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (opacity < 1.0f && layerType == EquipmentModel.LayerType.HUMANOID_LEGGINGS) {
+            EquippableComponent equippable = stack.get(DataComponentTypes.EQUIPPABLE);
             if (equippable != null && equippable.slot() == EquipmentSlot.CHEST)
                 return;
         }
@@ -147,8 +147,8 @@ public class EquipmentRendererMixin {
         int modifiedColor = color;
         if (opacity < 1.0f) {
             int alpha = (int) (opacity * 255.0f);
-            modifiedColor = ARGB.color(alpha, ARGB.red(color), ARGB.green(color),
-                    ARGB.blue(color));
+            modifiedColor = ColorHelper.getArgb(alpha, ColorHelper.getRed(color), ColorHelper.getGreen(color),
+                    ColorHelper.getBlue(color));
         }
         original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, sprite, unknown1, crumbling);
     }

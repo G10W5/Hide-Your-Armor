@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "showmeyourskin",
+  "version": "${version}",
+
+  "name": "Show Me Your Skin!",
+  "description": "A mod to hide or customize armor rendering.",
+  "authors": [
+    "enjarai"
+  ],
+  "contact": {
+    "homepage": "https://enjarai.dev/",
+    "sources": "https://codeberg.org/enjarai/show-me-your-skin",
+    "issues": "https://codeberg.org/enjarai/show-me-your-skin/issues"
+  },
+
+  "license": "MIT",
+  "icon": "assets/showmeyourskin/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "nl.enjarai.showmeyourskin.ShowMeYourSkin"
+    ],
+    "client": [
+      "nl.enjarai.showmeyourskin.ShowMeYourSkinClient"
+    ],
+    "modmenu": [
+      "nl.enjarai.showmeyourskin.compat.modmenu.ModMenuIntegration"
+    ],
+    "cicada": [
+      "nl.enjarai.showmeyourskin.ShowMeYourSkinClient"
+    ],
+    "cardinal-components": [
+      "nl.enjarai.showmeyourskin.Components"
+    ]
+  },
+  "mixins": [
+    "showmeyourskin.mixins.json"
+  ],
+  "accessWidener" : "showmeyourskin.accesswidener",
+
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "fabric-api": "*",
+    "minecraft": ">=26.1 <26.2",
+    "cicada": ">=0.14.3 <1.0.0",
+    "owo": ">=0.13.0",
+    "cardinal-components-base": "*",
+    "cardinal-components-entity": "*"
+  },
+
+  "custom": {
+    "projects": {
+      "modrinth": "bD7YqcA3",
+      "curseforge": 622010
+    },
+    "cardinal-components": [
+      "showmeyourskin:armor_config"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "nl.enjarai.showmeyourskin.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "LivingEntityAccessor",
+    "compat.wildfiregender.GenderArmorLayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "ClientMannequinAccessor",
+    "ClientMannequinMixin",
+    "EntityRendererMixin",
+    "ItemStackRenderStateAccessor",
+    "LivingEntityMixin",
+    "LivingEntityRendererMixin",
+    "armor.EquipmentLayerRendererMixin",
+    "hat.CustomHeadLayerMixin",
+    "hat.GuiMixin",
+    "shield.ItemInHandLayerMixin",
+    "shield.ItemInHandRendererMixin"
+  ]
+}

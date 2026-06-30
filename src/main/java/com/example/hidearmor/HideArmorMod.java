@@ -13,16 +13,16 @@ public class HideArmorMod implements ModInitializer {
         config = ModConfig.load();
 
         // --- Payload registration (must happen on BOTH client and server) ---
-        PayloadTypeRegistry.serverboundPlay().register(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC);
-        PayloadTypeRegistry.clientboundPlay().register(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC);
 
         // --- Server-side relay: when ANY client sends us their config, forward to all
         // others ---
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             ServerPlayNetworking.registerGlobalReceiver(PlayerConfigPayload.ID, (payload, context) -> {
                 // Relay to all OTHER players
-                context.server().getPlayerList().getPlayers().forEach(player -> {
-                    if (!player.getUUID().equals(payload.playerUuid())) {
+                context.server().getPlayerManager().getPlayerList().forEach(player -> {
+                    if (!player.getUuid().equals(payload.playerUuid())) {
                         ServerPlayNetworking.send(player, payload);
                     }
                 });

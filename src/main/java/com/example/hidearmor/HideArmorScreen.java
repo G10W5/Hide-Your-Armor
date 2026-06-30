@@ -1,17 +1,18 @@
 package com.example.hidearmor;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.option.SimpleOption;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.OptionInstance;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 public class HideArmorScreen extends Screen {
         private enum ActiveTab {
@@ -37,10 +38,10 @@ public class HideArmorScreen extends Screen {
         private static final float ANIM_MS = 380f;
 
         private PlayerPreviewWidget previewWidget;
-        private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath("hidearmor", "textures/gui/bg.png");
+        private static final Identifier BG_TEXTURE = Identifier.of("hidearmor", "textures/gui/bg.png");
 
         // Item icons drawn next to each slider (cleared on every rebuildWidgets)
-        private record IconInfo(net.minecraft.world.item.Item item, int x, int y) {
+        private record IconInfo(net.minecraft.item.Item item, int x, int y) {
         }
 
         private final List<IconInfo> sliderIcons = new ArrayList<>();
@@ -51,7 +52,7 @@ public class HideArmorScreen extends Screen {
         private final List<GlintToggleInfo> glintToggles = new ArrayList<>();
 
         public HideArmorScreen(Screen parent) {
-                super(Component.translatable("gui.hidearmor.title"));
+                super(Text.translatable("gui.hidearmor.title"));
         }
 
         private int px() {
@@ -67,7 +68,7 @@ public class HideArmorScreen extends Screen {
                 if (closeTime > 0) {
                         float t = 1f - Math.min((now - closeTime) / ANIM_MS, 1f);
                         if (t <= 0) {
-                                super.onClose();
+                                super.close();
                                 return 0f;
                         }
                         return t * t * (3f - 2f * t);
@@ -82,16 +83,11 @@ public class HideArmorScreen extends Screen {
         protected void init() {
                 if (openTime < 0)
                         openTime = System.currentTimeMillis();
-                buildWidgets();
+                rebuildWidgets();
         }
 
-        @Override
-        protected void rebuildWidgets() {
-                buildWidgets();
-        }
-
-        private void buildWidgets() {
-                this.clearWidgets();
+        private void rebuildWidgets() {
+                this.clearChildren();
                 sliderIcons.clear();
                 glintToggles.clear();
 
@@ -101,12 +97,12 @@ public class HideArmorScreen extends Screen {
 
                 // ---- Tab buttons ----
                 int tabW = 22, tabGap = 26;
-                this.addRenderableWidget(new ToggleIconButton(contentX, py + 6, tabW, tabW, Items.IRON_CHESTPLATE,
+                this.addDrawableChild(new ToggleIconButton(contentX, py + 6, tabW, tabW, Items.IRON_CHESTPLATE,
                                 activeTab == ActiveTab.ARMOR, b -> {
                                         activeTab = ActiveTab.ARMOR;
                                         rebuildWidgets();
                                 }, false));
-                this.addRenderableWidget(new ToggleIconButton(contentX + tabGap, py + 6, tabW, tabW, Items.SHIELD,
+                this.addDrawableChild(new ToggleIconButton(contentX + tabGap, py + 6, tabW, tabW, Items.SHIELD,
                                 activeTab == ActiveTab.OFFHAND, b -> {
                                         activeTab = ActiveTab.OFFHAND;
                                         rebuildWidgets();
@@ -149,12 +145,12 @@ public class HideArmorScreen extends Screen {
                                 rebuildWidgets();
                         });
                 } else {
-                        String btnText = Component.translatable("gui.hidearmor.shield").getString() + ": "
+                        String btnText = Text.translatable("gui.hidearmor.shield").getString() + ": "
                                         + (config.shieldOpacity > 0.5f ? "ON" : "OFF");
-                        this.addRenderableWidget(Button.builder(Component.literal(btnText), btn -> {
+                        this.addDrawableChild(ButtonWidget.builder(Text.literal(btnText), btn -> {
                                 config.shieldOpacity = (config.shieldOpacity > 0.5f) ? 0.0f : 1.0f;
                                 rebuildWidgets();
-                        }).bounds(sliderX, sliderY, SLIDER_W, 20).build());
+                        }).dimensions(sliderX, sliderY, SLIDER_W, 20).build());
                         sliderIcons.add(new IconInfo(Items.SHIELD, iconX, sliderY + 2));
                         addGlintToggle(glintBtnX, sliderY, config.showGlintShield, b -> {
                                 config.showGlintShield = !config.showGlintShield;
@@ -165,17 +161,17 @@ public class HideArmorScreen extends Screen {
                 // ---- Visibility toggles ----
                 int iconY = py + ICON_TOP;
                 int iconGap = 28;
-                this.addRenderableWidget(new ToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
+                this.addDrawableChild(new ToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
                                 !config.showSkullsAndBlocks, b -> {
                                         config.showSkullsAndBlocks = !config.showSkullsAndBlocks;
                                         rebuildWidgets();
                                 }, !config.showSkullsAndBlocks));
-                this.addRenderableWidget(new ToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
+                this.addDrawableChild(new ToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
                                 !config.showElytra, b -> {
                                         config.showElytra = !config.showElytra;
                                         rebuildWidgets();
                                 }, !config.showElytra));
-                this.addRenderableWidget(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 24, 24,
+                this.addDrawableChild(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 24, 24,
                                 Items.COMPASS, !config.enableMultiplayerSync,
                                 b -> {
                                         config.enableMultiplayerSync = !config.enableMultiplayerSync;
@@ -185,8 +181,8 @@ public class HideArmorScreen extends Screen {
                                 }, !config.enableMultiplayerSync, "Multiplayer sync"));
 
                 // ---- Done button ----
-                this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, btn -> this.onClose())
-                                .bounds(px + 8, py + DONE_TOP, 60, 20).build());
+                this.addDrawableChild(ButtonWidget.builder(ScreenTexts.DONE, btn -> this.close())
+                                .dimensions(px + 8, py + DONE_TOP, 60, 20).build());
 
                 // ---- Player preview ----
                 int rightW = PANEL_W - LEFT_W;
@@ -195,27 +191,27 @@ public class HideArmorScreen extends Screen {
                                 px + LEFT_W + 8,
                                 py + 8,
                                 previewW, previewH);
-                this.addRenderableWidget(this.previewWidget);
+                this.addDrawableChild(this.previewWidget);
         }
 
-        private void addGlintToggle(int x, int y, boolean currentState, Button.OnPress onPress) {
-                net.minecraft.world.item.Item icon = currentState ? Items.ENCHANTED_BOOK : Items.BOOK;
+        private void addGlintToggle(int x, int y, boolean currentState, ButtonWidget.PressAction onPress) {
+                net.minecraft.item.Item icon = currentState ? Items.ENCHANTED_BOOK : Items.BOOK;
                 ToggleIconButton btn = new ToggleIconButton(x, y, 20, 20, icon, currentState, onPress, !currentState);
-                this.addRenderableWidget(btn);
+                this.addDrawableChild(btn);
                 glintToggles.add(new GlintToggleInfo(x, y, currentState));
         }
 
-        private net.minecraft.client.gui.components.AbstractWidget addSlider(int sliderX, int iconX, int sliderY,
-                        String key, net.minecraft.world.item.Item icon,
+        private net.minecraft.client.gui.widget.ClickableWidget addSlider(int sliderX, int iconX, int sliderY,
+                        String key, net.minecraft.item.Item icon,
                         float init, java.util.function.Consumer<Double> setter) {
                 // Direct slider widget
-                net.minecraft.client.gui.components.AbstractWidget widget = new OptionInstance<>(key,
-                                OptionInstance.noTooltip(),
-                                (t, v) -> Component.literal(Component.translatable(key).getString().split(" ")[0] + " "
+                net.minecraft.client.gui.widget.ClickableWidget widget = new SimpleOption<>(key,
+                                SimpleOption.emptyTooltip(),
+                                (t, v) -> Text.literal(Text.translatable(key).getString().split(" ")[0] + " "
                                                 + (int) (v * 100) + "%"),
-                                OptionInstance.UnitDouble.INSTANCE, Codec.DOUBLE, (double) init, setter)
-                                .createButton(minecraft.options, sliderX, sliderY, SLIDER_W);
-                this.addRenderableWidget(widget);
+                                SimpleOption.DoubleSliderCallbacks.INSTANCE, Codec.DOUBLE, (double) init, setter)
+                                .createWidget(client.options, sliderX, sliderY, SLIDER_W);
+                this.addDrawableChild(widget);
 
                 // Store icon info for rendering
                 sliderIcons.add(new IconInfo(icon, iconX, sliderY + 2));
@@ -227,18 +223,18 @@ public class HideArmorScreen extends Screen {
         // ============================================================
 
         @Override
-        public void extractBackground(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
+        public void renderBackground(DrawContext ctx, int mx, int my, float delta) {
                 // Only apply the blur (full-screen, not animated)
-                super.extractBackground(ctx, mx, my, delta);
+                super.renderBackground(ctx, mx, my, delta);
         }
 
         @Override
-        public boolean isPauseScreen() {
+        public boolean shouldPause() {
                 return false;
         }
 
         @Override
-        public void extractRenderState(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
+        public void render(DrawContext ctx, int mx, int my, float delta) {
                 float anim = animProgress();
                 int yOff = (int) ((1f - anim) * 50f);
 
@@ -247,14 +243,14 @@ public class HideArmorScreen extends Screen {
                 }
 
                 // Push matrix so the entire panel (background + widgets) slides up together
-                ctx.pose().pushMatrix();
-                ctx.pose().translate(0f, (float) yOff);
+                ctx.getMatrices().pushMatrix();
+                ctx.getMatrices().translate(0, yOff);
 
                 // Draw panel background / borders at translated position
                 drawPanel(ctx, anim);
 
                 // Render all children with adjusted mouse Y so hit-testing still works
-                super.extractRenderState(ctx, mx, my - yOff, delta);
+                super.render(ctx, mx, my - yOff, delta);
 
                 // Post-child decorations (on top of sliders)
                 int px = px(), py = py();
@@ -266,24 +262,24 @@ public class HideArmorScreen extends Screen {
                 ctx.fill(activeTabX, py + 6 + 22 + 2, activeTabX + 22, py + 6 + 22 + 3, 0xFFFFFFFF);
 
                 // "Visibility" label
-                ctx.text(this.font, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
+                ctx.drawText(this.textRenderer, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
 
                 // "Glint" column header (centered above the toggle buttons)
                 if (activeTab == ActiveTab.ARMOR) {
                         int glintHeaderX = contentX + 20 + SLIDER_W + 6;
-                        ctx.text(this.font, "Glint", glintHeaderX, py + 30, 0xFF777777, false);
+                        ctx.drawText(this.textRenderer, "Glint", glintHeaderX, py + 30, 0xFF777777, false);
                 }
 
 
                 // Item icons next to sliders
                 for (IconInfo info : sliderIcons) {
-                        ctx.item(new ItemStack(info.item()), info.x(), info.y());
+                        ctx.drawItem(new ItemStack(info.item()), info.x(), info.y());
                 }
 
-                ctx.pose().popMatrix();
+                ctx.getMatrices().popMatrix();
         }
 
-        private void drawPanel(GuiGraphicsExtractor ctx, float anim) {
+        private void drawPanel(DrawContext ctx, float anim) {
                 int px = px(), py = py();
                 int alpha = (int) (anim * 255);
                 ModConfig config = HideArmorMod.getConfig();
@@ -345,7 +341,7 @@ public class HideArmorScreen extends Screen {
                                 for (int tx = 0; tx < PANEL_W; tx += tileSize) {
                                         int tw = Math.min(tileSize, PANEL_W - tx);
                                         int th = Math.min(tileSize, PANEL_H - ty);
-                                        ctx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, BG_TEXTURE, px + tx, py + ty, 0.0f, 0.0f, tw, th, tileSize, tileSize, 0xFFFFFFFF);
+                                        ctx.drawTexture(net.minecraft.client.gl.RenderPipelines.GUI_TEXTURED, BG_TEXTURE, px + tx, py + ty, 0.0f, 0.0f, tw, th, tileSize, tileSize, 0xFFFFFFFF);
                                 }
                         }
 
@@ -368,29 +364,29 @@ public class HideArmorScreen extends Screen {
         }
 
         @Override
-        public void onClose() {
+        public void close() {
                 HideArmorMod.getConfig().save();
                 HideArmorClient.broadcastConfig();
-                super.onClose();
+                super.close();
         }
 
         // ============================================================
         // Toggle Icon Button
         // ============================================================
-        private class ToggleIconButton extends Button {
-                private final net.minecraft.world.item.Item item;
+        private class ToggleIconButton extends ButtonWidget {
+                private final net.minecraft.item.Item item;
                 private final boolean showCross;
 
-                public ToggleIconButton(int x, int y, int w, int h, net.minecraft.world.item.Item item,
-                                boolean active, OnPress onPress, boolean showCross) {
-                        super(x, y, w, h, net.minecraft.network.chat.Component.nullToEmpty(""), onPress, DEFAULT_NARRATION);
+                public ToggleIconButton(int x, int y, int w, int h, net.minecraft.item.Item item,
+                                boolean active, PressAction onPress, boolean showCross) {
+                        super(x, y, w, h, net.minecraft.text.Text.of(""), onPress, DEFAULT_NARRATION_SUPPLIER);
                         this.item = item;
                         this.showCross = showCross;
                 }
 
                 @Override
-                protected void extractContents(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
-                        ctx.item(new ItemStack(item), getX() + (getWidth() - 16) / 2,
+                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                        ctx.drawItem(new ItemStack(item), getX() + (getWidth() - 16) / 2,
                                         getY() + (getHeight() - 16) / 2);
                         if (showCross) {
                                 int x1 = getX() + 2, y1 = getY() + 2;
@@ -412,18 +408,18 @@ public class HideArmorScreen extends Screen {
         private class TooltipToggleIconButton extends ToggleIconButton {
                 private final String tooltipText;
 
-                public TooltipToggleIconButton(int x, int y, int w, int h, net.minecraft.world.item.Item item,
-                                boolean active, OnPress onPress, boolean showCross, String tooltipText) {
+                public TooltipToggleIconButton(int x, int y, int w, int h, net.minecraft.item.Item item,
+                                boolean active, PressAction onPress, boolean showCross, String tooltipText) {
                         super(x, y, w, h, item, active, onPress, showCross);
                         this.tooltipText = tooltipText;
                 }
 
                 @Override
-                protected void extractContents(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
-                        super.extractContents(ctx, mx, my, delta);
+                public void drawIcon(DrawContext ctx, int mx, int my, float delta) {
+                        super.drawIcon(ctx, mx, my, delta);
                         if (isHovered()) {
-                                ctx.setTooltipForNextFrame(HideArmorScreen.this.font,
-                                                net.minecraft.network.chat.Component.literal(tooltipText), mx, my);
+                                ctx.drawTooltip(HideArmorScreen.this.textRenderer,
+                                                net.minecraft.text.Text.literal(tooltipText), mx, my);
                         }
                 }
         }
