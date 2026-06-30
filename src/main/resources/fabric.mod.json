@@ -1,0 +1,37 @@
+{
+    "schemaVersion": 1,
+    "id": "hidearmor",
+    "version": "${version}",
+    "name": "Hide Armor Mod",
+    "description": "A mod to hide your armor with a keybind.",
+    "authors": [
+        "Your Name"
+    ],
+    "contact": {
+        "homepage": "https://example.com",
+        "sources": "https://github.com/example/hidearmor",
+        "issues": "https://github.com/example/hidearmor/issues"
+    },
+    "license": "MIT",
+    "icon": "assets/hidearmor/icon.png",
+    "entrypoints": {
+        "main": [
+            "com.example.hidearmor.HideArmorMod"
+        ],
+        "client": [
+            "com.example.hidearmor.HideArmorClient"
+        ]
+    },
+    "mixins": [
+        "hidearmor.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.12.5",
+        "minecraft": "26.1",
+        "java": ">=25",
+        "fabric-api": "*"
+    },
+    "suggests": {
+        "another-mod": "*"
+    }
+}
