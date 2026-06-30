@@ -1,11 +1,10 @@
 package com.example.hidearmor;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-
 import java.util.UUID;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 
 /**
  * Network packet that broadcasts a player's opacity config to other clients.
@@ -26,16 +25,16 @@ public record PlayerConfigPayload(
         boolean showGlintChestplate,
         boolean showGlintLeggings,
         boolean showGlintBoots,
-        boolean showGlintShield) implements CustomPayload {
+        boolean showGlintShield) implements CustomPacketPayload {
 
-    public static final CustomPayload.Id<PlayerConfigPayload> ID = new CustomPayload.Id<>(
-            Identifier.of("hidearmor", "sync"));
+    public static final CustomPacketPayload.Type<PlayerConfigPayload> ID = new CustomPacketPayload.Type<>(
+            Identifier.fromNamespaceAndPath("hidearmor", "sync"));
 
-    public static final PacketCodec<PacketByteBuf, PlayerConfigPayload> CODEC = PacketCodec
-            .of(PlayerConfigPayload::encode, PlayerConfigPayload::decode);
+    public static final StreamCodec<FriendlyByteBuf, PlayerConfigPayload> CODEC = StreamCodec
+            .ofMember(PlayerConfigPayload::encode, PlayerConfigPayload::decode);
 
-    private static void encode(PlayerConfigPayload payload, PacketByteBuf buf) {
-        buf.writeUuid(payload.playerUuid);
+    private static void encode(PlayerConfigPayload payload, FriendlyByteBuf buf) {
+        buf.writeUUID(payload.playerUuid);
         buf.writeFloat(payload.helmetOpacity);
         buf.writeFloat(payload.chestplateOpacity);
         buf.writeFloat(payload.leggingsOpacity);
@@ -50,9 +49,9 @@ public record PlayerConfigPayload(
         buf.writeBoolean(payload.showGlintShield);
     }
 
-    private static PlayerConfigPayload decode(PacketByteBuf buf) {
+    private static PlayerConfigPayload decode(FriendlyByteBuf buf) {
         return new PlayerConfigPayload(
-                buf.readUuid(),
+                buf.readUUID(),
                 buf.readFloat(),
                 buf.readFloat(),
                 buf.readFloat(),
@@ -104,7 +103,7 @@ public record PlayerConfigPayload(
     }
 
     @Override
-    public CustomPayload.Id<? extends CustomPayload> getId() {
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

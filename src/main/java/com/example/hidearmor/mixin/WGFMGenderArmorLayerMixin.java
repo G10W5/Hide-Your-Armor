@@ -2,9 +2,10 @@ package com.example.hidearmor.mixin;
 
 import com.example.hidearmor.HideArmorMod;
 import com.example.hidearmor.LocalPlayerTracker;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.resources.Identifier;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,8 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * Handles WGFM breast armor transparency:
  * - At 0% opacity, cancels the render entirely via @Inject at HEAD.
  * - At partial opacity, swaps the render layer to armorTranslucent.
- * - Alpha in the vertex color is handled downstream by WGFMGenderLayerMixin
- * which already modifies the color in GenderLayer.renderBox().
+ * - Glint is suppressed by replacing the MutableBoolean glint param with false.
+ *   (renderGlint() no longer exists in WGFM 5.x; glint is inlined in renderBreastArmor)
  */
 @Pseudo
 @Mixin(targets = "com.wildfire.render.GenderArmorLayer")
@@ -40,8 +41,6 @@ public class WGFMGenderArmorLayerMixin {
 
     /**
      * Cancel the breast armor TRIM render entirely at 0% opacity.
-     * Trim is rendered separately from the main armor geometry, so it needs its own
-     * cancel.
      */
     @Inject(method = "renderArmorTrim", at = @At("HEAD"), cancellable = true, remap = false)
     private void onRenderArmorTrimHead(CallbackInfo ci) {
@@ -65,17 +64,15 @@ public class WGFMGenderArmorLayerMixin {
     /**
      * Swap armorCutoutNoCull for armorTranslucent when opacity < 1.0.
      * This enables alpha blending on the breast armor geometry.
-     * The actual vertex alpha is set by WGFMGenderLayerMixin which already
-     * intercepts GenderLayer.renderBox() and modifies the color parameter there.
      */
     @ModifyVariable(method = "renderBreastArmor", at = @At("STORE"), ordinal = 0, remap = false)
-    private RenderLayer modifyBreastArmorLayer(RenderLayer originalLayer) {
+    private RenderType modifyBreastArmorLayer(RenderType originalLayer) {
         float alpha = HideArmorMod.getConfig().chestplateOpacity;
         if (LocalPlayerTracker.isRenderingLocalPlayer() && alpha < 1.0f && alpha > 0.0f) {
             Identifier tex = CURRENT_TEXTURE.get();
             CURRENT_TEXTURE.remove();
             if (tex != null) {
-                return RenderLayers.armorTranslucent(tex);
+                return RenderTypes.armorTranslucent(tex);
             }
         } else {
             CURRENT_TEXTURE.remove();
@@ -85,13 +82,16 @@ public class WGFMGenderArmorLayerMixin {
 
     /**
      * Suppress glint on breast armor if toggled off in config.
+     * In WGFM 5.x, glint is controlled by a MutableBoolean param in renderBreastArmor,
+     * not a separate renderGlint() method. We replace it with false to suppress.
      */
-    @Inject(method = "renderGlint", at = @At("HEAD"), cancellable = true, remap = false)
-    private void onRenderGlint(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+    @ModifyVariable(method = "renderBreastArmor", at = @At("HEAD"), argsOnly = true, ordinal = 0, remap = false)
+    private MutableBoolean suppressGlint(MutableBoolean glint) {
         if (!LocalPlayerTracker.isRenderingLocalPlayer())
-            return;
+            return glint;
         if (!HideArmorMod.getConfig().showGlintChestplate) {
-            ci.cancel();
+            return new MutableBoolean(false);
         }
+        return glint;
     }
 }

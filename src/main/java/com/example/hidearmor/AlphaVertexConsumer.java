@@ -1,6 +1,6 @@
 package com.example.hidearmor;
 
-import net.minecraft.client.render.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 public class AlphaVertexConsumer implements VertexConsumer {
     private final VertexConsumer delegate;
@@ -12,52 +12,52 @@ public class AlphaVertexConsumer implements VertexConsumer {
     }
 
     @Override
-    public VertexConsumer vertex(float x, float y, float z) {
-        delegate.vertex(x, y, z);
+    public VertexConsumer addVertex(float x, float y, float z) {
+        delegate.addVertex(x, y, z);
         return this;
     }
 
     @Override
-    public VertexConsumer color(int red, int green, int blue, int alpha) {
-        delegate.color(red, green, blue, Math.max(0, Math.min(255, (int) (alpha * alphaScale))));
+    public VertexConsumer setColor(int red, int green, int blue, int alpha) {
+        delegate.setColor(red, green, blue, Math.max(0, Math.min(255, (int) (alpha * alphaScale))));
         return this;
     }
 
     @Override
-    public VertexConsumer color(int argb) {
+    public VertexConsumer setColor(int argb) {
         int alpha = (argb >> 24) & 0xFF;
         int newAlpha = Math.max(0, Math.min(255, (int) (alpha * alphaScale)));
-        delegate.color((argb & 0x00FFFFFF) | (newAlpha << 24));
+        delegate.setColor((argb & 0x00FFFFFF) | (newAlpha << 24));
         return this;
     }
 
     @Override
-    public VertexConsumer texture(float u, float v) {
-        delegate.texture(u, v);
+    public VertexConsumer setUv(float u, float v) {
+        delegate.setUv(u, v);
         return this;
     }
 
     @Override
-    public VertexConsumer overlay(int u, int v) {
-        delegate.overlay(u, v);
+    public VertexConsumer setUv1(int u, int v) {
+        delegate.setUv1(u, v);
         return this;
     }
 
     @Override
-    public VertexConsumer light(int u, int v) {
-        delegate.light(u, v);
+    public VertexConsumer setUv2(int u, int v) {
+        delegate.setUv2(u, v);
         return this;
     }
 
     @Override
-    public VertexConsumer normal(float x, float y, float z) {
-        delegate.normal(x, y, z);
+    public VertexConsumer setNormal(float x, float y, float z) {
+        delegate.setNormal(x, y, z);
         return this;
     }
 
     @Override
-    public VertexConsumer lineWidth(float lineWidth) {
-        delegate.lineWidth(lineWidth);
+    public VertexConsumer setLineWidth(float lineWidth) {
+        delegate.setLineWidth(lineWidth);
         return this;
     }
 }

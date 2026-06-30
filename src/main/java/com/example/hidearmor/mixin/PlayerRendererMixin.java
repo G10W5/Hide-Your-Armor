@@ -1,49 +1,49 @@
 package com.example.hidearmor.mixin;
 
 import com.example.hidearmor.LocalPlayerTracker;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
+import com.mojang.blaze3d.vertex.PoseStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(LivingEntityRenderer.class)
 public class PlayerRendererMixin {
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("HEAD"))
-    private void onPreRender(LivingEntityRenderState state, MatrixStack matrices,
-            OrderedRenderCommandQueue queue, CameraRenderState cameraState, CallbackInfo ci) {
-        if (state instanceof PlayerEntityRenderState playerState) {
-            var client = MinecraftClient.getInstance();
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
+    private void onPreRender(LivingEntityRenderState state, PoseStack matrices,
+            SubmitNodeCollector queue, CameraRenderState cameraState, CallbackInfo ci) {
+        if (state instanceof AvatarRenderState playerState) {
+            var client = Minecraft.getInstance();
             if (client.player != null) {
-                LocalPlayerTracker.setLocalPlayer(client.player.getId(), client.player.getUuid());
+                LocalPlayerTracker.setLocalPlayer(client.player.getId(), client.player.getUUID());
             }
             // Resolve UUID from the entity in the world
             UUID uuid = null;
-            if (client.world != null) {
-                Entity entity = client.world.getEntityById(playerState.id);
-                if (entity instanceof AbstractClientPlayerEntity player) {
-                    uuid = player.getUuid();
+            if (client.level != null) {
+                Entity entity = client.level.getEntity(playerState.id);
+                if (entity instanceof AbstractClientPlayer player) {
+                    uuid = player.getUUID();
                 }
             }
             LocalPlayerTracker.beginRender(playerState.id, uuid);
         }
     }
 
-    @Inject(method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V", at = @At("RETURN"))
-    private void onPostRender(LivingEntityRenderState state, MatrixStack matrices,
-            OrderedRenderCommandQueue queue, CameraRenderState cameraState, CallbackInfo ci) {
-        if (state instanceof PlayerEntityRenderState) {
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("RETURN"))
+    private void onPostRender(LivingEntityRenderState state, PoseStack matrices,
+            SubmitNodeCollector queue, CameraRenderState cameraState, CallbackInfo ci) {
+        if (state instanceof AvatarRenderState) {
             LocalPlayerTracker.endRender();
         }
     }

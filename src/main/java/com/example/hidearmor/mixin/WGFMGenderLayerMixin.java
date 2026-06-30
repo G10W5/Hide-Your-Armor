@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * Targets Wildfire's Gender Mod.
  */
 @Pseudo
-@Mixin(targets = "com.wildfire.render.GenderLayer")
+@Mixin(targets = "com.wildfire.render.WildfireModelRenderer")
 public class WGFMGenderLayerMixin {
 
     /**
@@ -22,7 +22,7 @@ public class WGFMGenderLayerMixin {
      * int color)
      * The color parameter is the 3rd integer parameter, so ordinal = 2.
      */
-    @ModifyVariable(method = "renderBox", at = @At("HEAD"), ordinal = 2, argsOnly = true, remap = false)
+    @ModifyVariable(method = "renderBox(Lcom/wildfire/render/WildfireModelRenderer$ModelBox;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At("HEAD"), ordinal = 2, argsOnly = true, remap = false)
     private static int modifyBreastRenderColor(int originalColor) {
         float alpha = HideArmorMod.getConfig().chestplateOpacity;
         if (!LocalPlayerTracker.isRenderingLocalPlayer()) {
