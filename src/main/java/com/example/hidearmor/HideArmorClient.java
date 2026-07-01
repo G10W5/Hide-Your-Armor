@@ -35,10 +35,10 @@ public class HideArmorClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 if (client.player != null) {
-                    if (client.screen instanceof HideArmorScreen screen) {
+                    if (client.gui.screen() instanceof HideArmorScreen screen) {
                         screen.onClose();
-                    } else if (client.screen == null) {
-                        client.setScreen(new HideArmorScreen(null));
+                    } else if (client.gui.screen() == null) {
+                        client.gui.setScreen(new HideArmorScreen(null));
                     }
                 }
             }

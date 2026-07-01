@@ -1,6 +1,5 @@
 package com.example.hidearmor;
 
-import com.mojang.serialization.Codec;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.OptionInstance;
@@ -211,11 +210,12 @@ public class HideArmorScreen extends Screen {
                         String key, net.minecraft.world.item.Item icon,
                         float init, java.util.function.Consumer<Double> setter) {
                 // Direct slider widget
-                net.minecraft.client.gui.components.AbstractWidget widget = new OptionInstance<>(key,
+                OptionInstance<Double> option = new OptionInstance<>(key,
                                 OptionInstance.noTooltip(),
                                 (t, v) -> Component.literal(Component.translatable(key).getString().split(" ")[0] + " "
                                                 + (int) (v * 100) + "%"),
-                                OptionInstance.UnitDouble.INSTANCE, Codec.DOUBLE, (double) init, setter)
+                                OptionInstance.UnitDouble.INSTANCE, (double) init, (val) -> setter.accept(val));
+                net.minecraft.client.gui.components.AbstractWidget widget = option
                                 .createButton(minecraft.options, sliderX, sliderY, SLIDER_W);
                 this.addRenderableWidget(widget);
 

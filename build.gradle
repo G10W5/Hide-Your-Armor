@@ -36,7 +36,7 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	
 	// Wildfire's Female Gender Mod for compatibility
-	compileOnly "maven.modrinth:female-gender:5.0.0-Beta.3+26.1"
+	compileOnly "maven.modrinth:female-gender:5.0.0-Beta.4+26.2"
 }
 
 
