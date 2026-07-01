@@ -148,13 +148,8 @@ public class HideArmorScreen extends Screen {
                                 rebuildWidgets();
                         });
                 } else {
-                        String btnText = Component.translatable("gui.hidearmor.shield").getString() + ": "
-                                        + (config.shieldOpacity > 0.5f ? "ON" : "OFF");
-                        this.addRenderableWidget(Button.builder(Component.literal(btnText), btn -> {
-                                config.shieldOpacity = (config.shieldOpacity > 0.5f) ? 0.0f : 1.0f;
-                                rebuildWidgets();
-                        }).bounds(sliderX, sliderY, SLIDER_W, 20).build());
-                        sliderIcons.add(new IconInfo(Items.SHIELD, iconX, sliderY + 2));
+                        addSlider(sliderX, iconX, sliderY, "gui.hidearmor.shield", Items.SHIELD,
+                                        config.shieldOpacity, v -> config.shieldOpacity = v.floatValue());
                         addGlintToggle(glintBtnX, sliderY, config.showGlintShield, b -> {
                                 config.showGlintShield = !config.showGlintShield;
                                 rebuildWidgets();
@@ -271,10 +266,8 @@ public class HideArmorScreen extends Screen {
                 ctx.text(this.font, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
 
                 // "Glint" column header (centered above the toggle buttons)
-                if (activeTab == ActiveTab.ARMOR) {
-                        int glintHeaderX = contentX + 20 + SLIDER_W + 6;
-                        ctx.text(this.font, "Glint", glintHeaderX, py + 30, 0xFF777777, false);
-                }
+                int glintHeaderX = contentX + 20 + SLIDER_W + 6;
+                ctx.text(this.font, "Glint", glintHeaderX, py + 24, 0xFF777777, false);
 
 
                 // Item icons next to sliders

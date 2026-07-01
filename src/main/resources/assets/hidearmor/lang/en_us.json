@@ -10,8 +10,8 @@
   "gui.hidearmor.chestplate": "Chestplate Opacity",
   "gui.hidearmor.leggings": "Leggings Opacity",
   "gui.hidearmor.boots": "Boots Opacity",
-  "gui.hidearmor.shield": "Shield Visibility",
-  "gui.hidearmor.offhand": "Shield Visibility",
+  "gui.hidearmor.shield": "Shield Opacity",
+  "gui.hidearmor.offhand": "Shield Opacity",
   "gui.hidearmor.opacity": "%d%%",
   "gui.hidearmor.tooltip.skull": "Toggle Skulls & Blocks visibility",
   "gui.hidearmor.tooltip.elytra": "Toggle Elytra visibility"
