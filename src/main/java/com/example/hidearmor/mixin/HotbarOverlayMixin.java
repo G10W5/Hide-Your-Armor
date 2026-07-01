@@ -26,9 +26,9 @@ public class HotbarOverlayMixin {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.gameMode == null) return;
 
-        // Only show if shield is hidden (opacity == 0)
+        // Show blocking animation when shield is mostly hidden (opacity < 25%)
         float shieldOpacity = HideArmorMod.getShieldOpacity();
-        if (shieldOpacity > 0.0f) return;
+        if (shieldOpacity >= 0.25f) return;
 
         // Only show if offhand item is a shield
         ItemStack offhand = mc.player.getItemInHand(InteractionHand.OFF_HAND);
