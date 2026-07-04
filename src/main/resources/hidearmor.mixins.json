@@ -12,8 +12,9 @@
 		"WGFMGenderLayerMixin",
 		"WGFMGenderArmorLayerMixin",
 		"HotbarOverlayMixin",
+		"ItemInHandLayerMixin",
 		"ShieldModelRendererMixin",
-		"ShieldEntityModelMixin"
+		"ShieldTransparencyMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
