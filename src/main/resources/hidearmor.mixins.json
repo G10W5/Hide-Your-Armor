@@ -11,6 +11,7 @@
 		"PlayerRendererMixin",
 		"WGFMGenderLayerMixin",
 		"WGFMGenderArmorLayerMixin",
+		"BreastPhysicsCompatMixin",
 		"HotbarOverlayMixin",
 		"ItemInHandLayerMixin",
 		"ShieldModelRendererMixin",

@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,7 @@ public class HideArmorScreen extends Screen {
 
         private ActiveTab activeTab = ActiveTab.ARMOR;
 
-        // Panel layout constants
+        // Main panel layout
         private static final int PANEL_W = 340;
         private static final int PANEL_H = 220;
         private static final int LEFT_W = 195;
@@ -30,7 +31,12 @@ public class HideArmorScreen extends Screen {
         private static final int ICON_TOP = 157;
         private static final int DONE_TOP = PANEL_H - 24;
 
-        // Open animation: slides up from below + fades in
+        // Preset strip layout (separate panel above main)
+        private static final int PRESET_STRIP_W = PANEL_W;
+        private static final int PRESET_STRIP_H = 32;
+        private static final int PRESET_STRIP_GAP = 4;
+
+        // Open animation
         private long openTime = -1;
         private long closeTime = -1;
         private static final float ANIM_MS = 380f;
@@ -38,16 +44,23 @@ public class HideArmorScreen extends Screen {
         private PlayerPreviewWidget previewWidget;
         private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath("hidearmor", "textures/gui/bg.png");
 
-        // Item icons drawn next to each slider (cleared on every rebuildWidgets)
-        private record IconInfo(net.minecraft.world.item.Item item, int x, int y) {
-        }
-
+        // Slider icons
+        private record IconInfo(net.minecraft.world.item.Item item, int x, int y) {}
         private final List<IconInfo> sliderIcons = new ArrayList<>();
 
-        // Glint toggle info for rendering
-        private record GlintToggleInfo(int x, int y, boolean enabled) {
-        }
+        // Glint toggle info
+        private record GlintToggleInfo(int x, int y, boolean enabled) {}
         private final List<GlintToggleInfo> glintToggles = new ArrayList<>();
+
+        // Preset tooltip info
+        private record PresetTooltipInfo(int x, int y, int w, int h, String name) {}
+        private final List<PresetTooltipInfo> presetTooltips = new ArrayList<>();
+
+        // Naming popup state
+        private boolean showingNamePopup = false;
+        private EditBox nameInput;
+        private Button confirmBtn;
+        private Button cancelBtn;
 
         public HideArmorScreen(Screen parent) {
                 super(Component.translatable("gui.hidearmor.title"));
@@ -58,7 +71,15 @@ public class HideArmorScreen extends Screen {
         }
 
         private int py() {
-                return (this.height - PANEL_H) / 2;
+                return (this.height - PANEL_H - PRESET_STRIP_H - PRESET_STRIP_GAP) / 2 + PRESET_STRIP_H + PRESET_STRIP_GAP;
+        }
+
+        private int presetStripX() {
+                return (this.width - PRESET_STRIP_W) / 2;
+        }
+
+        private int presetStripY() {
+                return py() - PRESET_STRIP_H - PRESET_STRIP_GAP;
         }
 
         private float animProgress() {
@@ -86,13 +107,18 @@ public class HideArmorScreen extends Screen {
 
         @Override
         protected void rebuildWidgets() {
-                buildWidgets();
+                if (!showingNamePopup) {
+                        buildWidgets();
+                } else {
+                        buildNamePopup();
+                }
         }
 
         private void buildWidgets() {
                 this.clearWidgets();
                 sliderIcons.clear();
                 glintToggles.clear();
+                presetTooltips.clear();
 
                 ModConfig config = HideArmorMod.getConfig();
                 int px = px(), py = py();
@@ -110,6 +136,38 @@ public class HideArmorScreen extends Screen {
                                         activeTab = ActiveTab.OFFHAND;
                                         rebuildWidgets();
                                 }, false));
+
+                // ---- Preset strip buttons (in the separate strip panel) ----
+                int psX = presetStripX() + 8;
+                int psY = presetStripY() + 16;
+                int presetBtnSize = 14;
+
+                // [+] button
+                this.addRenderableWidget(new PresetButton(
+                                psX, psY, presetBtnSize, presetBtnSize,
+                                "+", null, false, false, b -> {
+                                        showingNamePopup = true;
+                                        buildNamePopup();
+                                }));
+                psX += presetBtnSize + 3;
+
+                // Existing preset buttons
+                for (int i = 0; i < config.presets.size() && i < 9; i++) {
+                        final int idx = i;
+                        ModConfig.Preset preset = config.presets.get(i);
+                        boolean canDelete = !preset.isDefault();
+
+                        this.addRenderableWidget(new PresetButton(
+                                        psX, psY, presetBtnSize, presetBtnSize,
+                                        String.valueOf(i + 1), preset.name(), canDelete, canDelete,
+                                        b -> {
+                                                config.presets.get(idx).applyTo(config);
+                                                rebuildWidgets();
+                                        }));
+                        presetTooltips.add(new PresetTooltipInfo(
+                                        psX, psY, presetBtnSize, presetBtnSize, preset.name()));
+                        psX += presetBtnSize + 3;
+                }
 
                 // ---- Sliders ----
                 int sliderX = contentX + 20;
@@ -194,6 +252,44 @@ public class HideArmorScreen extends Screen {
                 this.addRenderableWidget(this.previewWidget);
         }
 
+        private void buildNamePopup() {
+                this.clearWidgets();
+                sliderIcons.clear();
+                glintToggles.clear();
+                presetTooltips.clear();
+
+                int cx = this.width / 2;
+                int cy = this.height / 2;
+                int popupW = 200;
+                int popupH = 80;
+                int popupX = cx - popupW / 2;
+                int popupY = cy - popupH / 2;
+
+                nameInput = new EditBox(this.font, popupX + 10, popupY + 25, popupW - 20, 18,
+                                Component.literal(""));
+                nameInput.setMaxLength(20);
+                nameInput.setFocused(true);
+                this.addWidget(nameInput);
+
+                confirmBtn = Button.builder(Component.literal("OK"), b -> {
+                        String name = nameInput.getValue().trim();
+                        if (name.isEmpty()) name = "Preset";
+                        ModConfig config = HideArmorMod.getConfig();
+                        config.presets.add(ModConfig.Preset.fromConfig(name, config));
+                        showingNamePopup = false;
+                        rebuildWidgets();
+                }).bounds(popupX + popupW - 120, popupY + popupH - 28, 50, 20).build();
+
+                cancelBtn = Button.builder(CommonComponents.GUI_CANCEL, b -> {
+                        showingNamePopup = false;
+                        rebuildWidgets();
+                }).bounds(popupX + 10, popupY + popupH - 28, 50, 20).build();
+
+                this.addRenderableWidget(nameInput);
+                this.addRenderableWidget(confirmBtn);
+                this.addRenderableWidget(cancelBtn);
+        }
+
         private void addGlintToggle(int x, int y, boolean currentState, Button.OnPress onPress) {
                 net.minecraft.world.item.Item icon = currentState ? Items.ENCHANTED_BOOK : Items.BOOK;
                 ToggleIconButton btn = new ToggleIconButton(x, y, 20, 20, icon, currentState, onPress, !currentState);
@@ -204,7 +300,6 @@ public class HideArmorScreen extends Screen {
         private net.minecraft.client.gui.components.AbstractWidget addSlider(int sliderX, int iconX, int sliderY,
                         String key, net.minecraft.world.item.Item icon,
                         float init, java.util.function.Consumer<Double> setter) {
-                // Direct slider widget
                 OptionInstance<Double> option = new OptionInstance<>(key,
                                 OptionInstance.noTooltip(),
                                 (t, v) -> Component.literal(Component.translatable(key).getString().split(" ")[0] + " "
@@ -213,8 +308,6 @@ public class HideArmorScreen extends Screen {
                 net.minecraft.client.gui.components.AbstractWidget widget = option
                                 .createButton(minecraft.options, sliderX, sliderY, SLIDER_W);
                 this.addRenderableWidget(widget);
-
-                // Store icon info for rendering
                 sliderIcons.add(new IconInfo(icon, iconX, sliderY + 2));
                 return widget;
         }
@@ -225,7 +318,6 @@ public class HideArmorScreen extends Screen {
 
         @Override
         public void extractBackground(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
-                // Only apply the blur (full-screen, not animated)
                 super.extractBackground(ctx, mx, my, delta);
         }
 
@@ -239,21 +331,31 @@ public class HideArmorScreen extends Screen {
                 float anim = animProgress();
                 int yOff = (int) ((1f - anim) * 50f);
 
+                if (showingNamePopup) {
+                        // Draw darkened background
+                        ctx.fill(0, 0, this.width, this.height, 0x80000000);
+                        drawNamePopup(ctx);
+                        super.extractRenderState(ctx, mx, my, delta);
+                        return;
+                }
+
                 if (this.previewWidget != null) {
                         this.previewWidget.setSlideYOffset(yOff);
                 }
 
-                // Push matrix so the entire panel (background + widgets) slides up together
                 ctx.pose().pushMatrix();
                 ctx.pose().translate(0f, (float) yOff);
 
-                // Draw panel background / borders at translated position
+                // Draw preset strip
+                drawPresetStrip(ctx, anim);
+
+                // Draw main panel
                 drawPanel(ctx, anim);
 
-                // Render all children with adjusted mouse Y so hit-testing still works
+                // Render all children
                 super.extractRenderState(ctx, mx, my - yOff, delta);
 
-                // Post-child decorations (on top of sliders)
+                // Post-child decorations
                 int px = px(), py = py();
                 int contentX = px + 10;
                 int tabGap = 26;
@@ -265,17 +367,59 @@ public class HideArmorScreen extends Screen {
                 // "Visibility" label
                 ctx.text(this.font, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
 
-                // "Glint" column header (centered above the toggle buttons)
+                // "Glint" column header
                 int glintHeaderX = contentX + 20 + SLIDER_W + 6;
                 ctx.text(this.font, "Glint", glintHeaderX, py + 24, 0xFF777777, false);
-
 
                 // Item icons next to sliders
                 for (IconInfo info : sliderIcons) {
                         ctx.item(new ItemStack(info.item()), info.x(), info.y());
                 }
 
+                // Preset tooltips
+                for (PresetTooltipInfo info : presetTooltips) {
+                        int mxT = mx, myT = my - yOff;
+                        if (mxT >= info.x() && mxT < info.x() + info.w() &&
+                            myT >= info.y() && myT < info.y() + info.h()) {
+                                ctx.setTooltipForNextFrame(this.font,
+                                                Component.literal(info.name()), mxT, myT);
+                        }
+                }
+
                 ctx.pose().popMatrix();
+        }
+
+        private void drawPresetStrip(GuiGraphicsExtractor ctx, float anim) {
+                int sx = presetStripX(), sy = presetStripY();
+                ModConfig config = HideArmorMod.getConfig();
+                boolean isSleek = "Sleek".equalsIgnoreCase(config.uiTheme);
+
+                if (isSleek) {
+                        ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF1A1A1E);
+                        // Border
+                        ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + 1, 0xFFFFFFFF);
+                        ctx.fill(sx, sy, sx + 1, sy + PRESET_STRIP_H, 0xFFFFFFFF);
+                        ctx.fill(sx, sy + PRESET_STRIP_H - 1, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF373737);
+                        ctx.fill(sx + PRESET_STRIP_W - 1, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF373737);
+                        // Inner bevel
+                        ctx.fill(sx + 1, sy + 1, sx + PRESET_STRIP_W - 1, sy + 2, 0xFFC6C6C6);
+                        ctx.fill(sx + 1, sy + 1, sx + 2, sy + PRESET_STRIP_H - 1, 0xFFC6C6C6);
+                        ctx.fill(sx + 1, sy + PRESET_STRIP_H - 2, sx + PRESET_STRIP_W - 1, sy + PRESET_STRIP_H - 1, 0xFF8B8B8B);
+                        ctx.fill(sx + PRESET_STRIP_W - 2, sy + 1, sx + PRESET_STRIP_W - 1, sy + PRESET_STRIP_H - 1, 0xFF8B8B8B);
+                        // Fill
+                        ctx.fill(sx + 2, sy + 2, sx + PRESET_STRIP_W - 2, sy + PRESET_STRIP_H - 2, 0xFF2D2D2D);
+                } else {
+                        ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF1A1A1E);
+                        int borderAlpha = (int) (anim * 200);
+                        int borderColor = (borderAlpha << 24) | 0xA0A0A0;
+                        ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + 1, borderColor);
+                        ctx.fill(sx, sy + PRESET_STRIP_H - 1, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, borderColor);
+                        ctx.fill(sx, sy, sx + 1, sy + PRESET_STRIP_H, borderColor);
+                        ctx.fill(sx + PRESET_STRIP_W - 1, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, borderColor);
+                }
+
+                // "Presets" label at top of strip
+                ctx.text(this.font, "Presets", sx + 8, sy + 4, 0xFF888888, false);
         }
 
         private void drawPanel(GuiGraphicsExtractor ctx, float anim) {
@@ -285,43 +429,28 @@ public class HideArmorScreen extends Screen {
                 boolean isSleek = "Sleek".equalsIgnoreCase(config.uiTheme);
 
                 if (isSleek) {
-                        // ---- Sleek Theme: Minecraft-style beveled border ----
-
-                        // Main background (dark charcoal, like MC inventory)
                         ctx.fill(px, py, px + PANEL_W, py + PANEL_H, 0xFF1A1A1E);
 
-                        // MC-style beveled border (outer)
-                        // Top edge - light
                         ctx.fill(px, py, px + PANEL_W, py + 2, 0xFFFFFFFF);
-                        // Left edge - light
                         ctx.fill(px, py, px + 2, py + PANEL_H, 0xFFFFFFFF);
-                        // Bottom edge - dark shadow
                         ctx.fill(px, py + PANEL_H - 2, px + PANEL_W, py + PANEL_H, 0xFF373737);
-                        // Right edge - dark shadow
                         ctx.fill(px + PANEL_W - 2, py, px + PANEL_W, py + PANEL_H, 0xFF373737);
 
-                        // MC-style beveled border (inner bevel)
-                        // Top inner - slightly darker than white
                         ctx.fill(px + 2, py + 2, px + PANEL_W - 2, py + 3, 0xFFC6C6C6);
-                        // Left inner
                         ctx.fill(px + 2, py + 2, px + 3, py + PANEL_H - 2, 0xFFC6C6C6);
-                        // Bottom inner - lighter shadow
                         ctx.fill(px + 2, py + PANEL_H - 3, px + PANEL_W - 2, py + PANEL_H - 2, 0xFF8B8B8B);
-                        // Right inner
                         ctx.fill(px + PANEL_W - 3, py + 2, px + PANEL_W - 2, py + PANEL_H - 2, 0xFF8B8B8B);
 
-                        // Inner panel fill (dark grey like MC containers)
                         ctx.fill(px + 3, py + 3, px + PANEL_W - 3, py + PANEL_H - 3, 0xFF2D2D2D);
 
                         // Horizontal separator under tabs
                         ctx.fill(px + 6, py + 34, px + LEFT_W - 6, py + 35, 0xFF4A4A54);
 
-                        // Inset backgrounds for each slider row (darker recessed slots)
+                        // Inset backgrounds for slider rows
                         int sliderY = py + SLIDER_TOP;
                         int sliderX = px + 10 + 20;
                         for (int i = 0; i < 4; i++) {
                                 int rowY = sliderY + SPACING * i;
-                                // Inset shadow (top-left darker, bottom-right lighter)
                                 ctx.fill(sliderX - 2, rowY - 1, sliderX + SLIDER_W + 2, rowY + 21, 0xFF191919);
                                 ctx.fill(sliderX - 1, rowY, sliderX + SLIDER_W + 1, rowY + 20, 0xFF222222);
                         }
@@ -329,12 +458,10 @@ public class HideArmorScreen extends Screen {
                         // Horizontal separator above visibility section
                         ctx.fill(px + 6, py + TOGGLE_TOP - 5, px + LEFT_W - 6, py + TOGGLE_TOP - 4, 0xFF4A4A54);
 
-                        // Vertical divider between left pane and player preview (recessed)
+                        // Vertical divider
                         ctx.fill(px + LEFT_W - 1, py + 4, px + LEFT_W, py + PANEL_H - 4, 0xFF191919);
                         ctx.fill(px + LEFT_W, py + 4, px + LEFT_W + 1, py + PANEL_H - 4, 0xFF4A4A54);
-
                 } else {
-                        // ---- Cobblestone Theme: tiled texture ----
                         int tileSize = 64;
                         for (int ty = 0; ty < PANEL_H; ty += tileSize) {
                                 for (int tx = 0; tx < PANEL_W; tx += tileSize) {
@@ -344,7 +471,6 @@ public class HideArmorScreen extends Screen {
                                 }
                         }
 
-                        // Border
                         int borderAlpha = (int) (anim * 200);
                         int borderColor = (borderAlpha << 24) | 0xA0A0A0;
                         ctx.fill(px, py, px + PANEL_W, py + 1, borderColor);
@@ -352,14 +478,31 @@ public class HideArmorScreen extends Screen {
                         ctx.fill(px, py, px + 1, py + PANEL_H, borderColor);
                         ctx.fill(px + PANEL_W - 1, py, px + PANEL_W, py + PANEL_H, borderColor);
 
-                        // Vertical divider
                         ctx.fill(px + LEFT_W, py + 5, px + LEFT_W + 1, py + PANEL_H - 5, 0xFF404050);
                 }
 
-                // Fade overlay tied to animation alpha
                 if (alpha < 255) {
                         ctx.fill(px, py, px + PANEL_W, py + PANEL_H, ((255 - alpha) << 24) | 0x000000);
                 }
+        }
+
+        private void drawNamePopup(GuiGraphicsExtractor ctx) {
+                int cx = this.width / 2;
+                int cy = this.height / 2;
+                int popupW = 200;
+                int popupH = 80;
+                int popupX = cx - popupW / 2;
+                int popupY = cy - popupH / 2;
+
+                // Popup background
+                ctx.fill(popupX, popupY, popupX + popupW, popupY + popupH, 0xFF1A1A1E);
+                ctx.fill(popupX, popupY, popupX + popupW, popupY + 1, 0xFFFFFFFF);
+                ctx.fill(popupX, popupY, popupX + 1, popupY + popupH, 0xFFFFFFFF);
+                ctx.fill(popupX, popupY + popupH - 1, popupX + popupW, popupY + popupH, 0xFF373737);
+                ctx.fill(popupX + popupW - 1, popupY, popupX + popupW, popupY + popupH, 0xFF373737);
+
+                // Title
+                ctx.text(this.font, "Name Preset", popupX + 10, popupY + 8, 0xFFCCCCCC, false);
         }
 
         @Override
@@ -367,6 +510,80 @@ public class HideArmorScreen extends Screen {
                 HideArmorMod.getConfig().save();
                 HideArmorClient.broadcastConfig();
                 super.onClose();
+        }
+
+        // ============================================================
+        // Preset Button
+        // ============================================================
+        private class PresetButton extends Button {
+                private final String label;
+                private final boolean canDelete;
+                private final boolean showDeleteHint;
+
+                public PresetButton(int x, int y, int w, int h, String label, String presetName,
+                                boolean canDelete, boolean showDeleteHint, OnPress onPress) {
+                        super(x, y, w, h, Component.nullToEmpty(label), onPress, DEFAULT_NARRATION);
+                        this.label = label;
+                        this.canDelete = canDelete;
+                        this.showDeleteHint = showDeleteHint;
+                }
+
+                @Override
+                protected void extractContents(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
+                        int bgColor = isHoveredOrFocused() ? 0xFF555555 : 0xFF333333;
+                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bgColor);
+
+                        int borderColor = isHoveredOrFocused() ? 0xFFAAAAAA : 0xFF666666;
+                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + 1, borderColor);
+                        ctx.fill(getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), borderColor);
+                        ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), borderColor);
+                        ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), borderColor);
+
+                        int textW = HideArmorScreen.this.font.width(label);
+                        int textX = getX() + (getWidth() - textW) / 2;
+                        int textY = getY() + (getHeight() - 8) / 2;
+                        ctx.text(HideArmorScreen.this.font, label, textX, textY, 0xFFCCCCCC, false);
+
+                        // Red dot hint for deletable presets
+                        if (showDeleteHint && isHoveredOrFocused()) {
+                                int dotX = getX() + getWidth() - 5;
+                                int dotY = getY() + 2;
+                                ctx.fill(dotX, dotY, dotX + 2, dotY + 2, 0xFFFF4444);
+                        }
+                }
+
+                @Override
+                public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean hasFocused) {
+                        if (this.active && this.visible && this.isHoveredOrFocused()) {
+                                int btn = event.buttonInfo().button();
+                                if (btn == 1 && canDelete) {
+                                        ModConfig config = HideArmorMod.getConfig();
+                                        int idx = getDeleteablePresetIndex();
+                                        if (idx >= 0) {
+                                                config.presets.remove(idx);
+                                                rebuildWidgets();
+                                        }
+                                        return true;
+                                }
+                        }
+                        return super.mouseClicked(event, hasFocused);
+                }
+
+                private int getDeleteablePresetIndex() {
+                        ModConfig config = HideArmorMod.getConfig();
+                        // Find which deletable preset this button represents
+                        int deletableCount = 0;
+                        for (int i = 0; i < config.presets.size(); i++) {
+                                if (!config.presets.get(i).isDefault()) {
+                                        // Match by label text (the number)
+                                        if (this.label.equals(String.valueOf(i + 1))) {
+                                                return i;
+                                        }
+                                        deletableCount++;
+                                }
+                        }
+                        return -1;
+                }
         }
 
         // ============================================================
@@ -402,7 +619,7 @@ public class HideArmorScreen extends Screen {
         }
 
         // ============================================================
-        // Tooltip Toggle Icon Button (compass / multiplayer sync)
+        // Tooltip Toggle Icon Button
         // ============================================================
         private class TooltipToggleIconButton extends ToggleIconButton {
                 private final String tooltipText;

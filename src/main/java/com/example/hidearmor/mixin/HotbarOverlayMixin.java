@@ -19,14 +19,15 @@ public class HotbarOverlayMixin {
 
     /**
      * After the hotbar is drawn, overlay the blocking animation on the
-     * offhand shield slot (only when shield opacity is 0 and player is blocking).
+     * offhand shield slot. The overlay alpha scales proportionally with
+     * how hidden the shield is (fully opaque at 0% shield opacity,
+     * invisible at 25%+ shield opacity).
      */
     @Inject(method = "extractItemHotbar", at = @At("RETURN"))
     private void onAfterHotbar(GuiGraphicsExtractor ctx, DeltaTracker tracker, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.gameMode == null) return;
 
-        // Show blocking animation when shield is mostly hidden (opacity < 25%)
         float shieldOpacity = HideArmorMod.getShieldOpacity();
         if (shieldOpacity >= 0.25f) return;
 
@@ -44,41 +45,40 @@ public class HotbarOverlayMixin {
         if (progress < 0) return;
 
         // --- Hotbar layout (vanilla constants) ---
-        // Main hotbar: width/2 - 91 .. width/2 + 91,  y = height - 22
-        // Offhand slot (right-handed): x = width/2 - 91 - 29,  y = height - 23
-        // Item inside the slot is 16x16, starting at slotX + 3, slotY + 3
-
         int screenW = mc.getWindow().getGuiScaledWidth();
         int screenH = mc.getWindow().getGuiScaledHeight();
 
         boolean leftHand = mc.options.mainHand().get() == net.minecraft.world.entity.HumanoidArm.LEFT;
         int slotX;
         if (leftHand) {
-            // offhand on right
             slotX = screenW / 2 + 91 + 3;
         } else {
-            // offhand on left (default)
             slotX = screenW / 2 - 91 - 29 + 3;
         }
         int slotY = screenH - 23 + 3;
 
-        // Item area is 16x16
         int itemX = slotX;
         int itemY = slotY;
         int itemW = 16;
         int itemH = 16;
 
-        // Sweep from top: progress goes 0→1 as the dark bar fills downward
+        // Proportional alpha: at 0% shield opacity → full overlay, at 25% → no overlay
+        float overlayStrength = 1.0f - (shieldOpacity / 0.25f);
+        int overlayAlpha = (int) (overlayStrength * 0xAA);
+
+        // Sweep from top: progress goes 0->1 as the dark bar fills downward
         int sweepH = (int) (itemH * progress);
 
         if (sweepH > 0) {
-            // Dark semi-transparent fill (like vanilla cooldown)
-            ctx.fill(itemX, itemY, itemX + itemW, itemY + sweepH, 0xAA000000);
+            int overlayColor = (overlayAlpha << 24) | 0x000000;
+            ctx.fill(itemX, itemY, itemX + itemW, itemY + sweepH, overlayColor);
         }
 
-        // Bright leading edge line for polish
+        // Bright leading edge line, also scaled by overlay strength
         if (sweepH < itemH) {
-            ctx.fill(itemX, itemY + sweepH, itemX + itemW, itemY + sweepH + 1, 0xCCFFFFFF);
+            int edgeAlpha = (int) (overlayStrength * 0xCC);
+            int edgeColor = (edgeAlpha << 24) | 0xFFFFFF;
+            ctx.fill(itemX, itemY + sweepH, itemX + itemW, itemY + sweepH + 1, edgeColor);
         }
     }
 }

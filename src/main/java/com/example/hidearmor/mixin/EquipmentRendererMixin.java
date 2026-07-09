@@ -1,5 +1,6 @@
 package com.example.hidearmor.mixin;
 
+import com.example.hidearmor.HideArmorMod;
 import com.example.hidearmor.LocalPlayerTracker;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -127,6 +128,16 @@ public class EquipmentRendererMixin {
             EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> fallbackModel, Object fallbackState,
             ItemStack stack) {
         float opacity = getOpacity(stack);
+
+        // Set flag for FemaleGenderMod compat: when chestplate is fully hidden,
+        // BreastPhysics should override tightness to 0 so breasts stay full size
+        if (opacity <= 0.0f && LocalPlayerTracker.isRenderingLocalPlayer()) {
+            Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+            if (equippable != null && equippable.slot() == EquipmentSlot.CHEST) {
+                HideArmorMod.isChestplateFullyHidden = true;
+            }
+        }
+
         if (opacity <= 0.0f)
             return; // invisible
 

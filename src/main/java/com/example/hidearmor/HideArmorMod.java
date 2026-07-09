@@ -60,6 +60,7 @@ public class HideArmorMod implements ModInitializer {
 
     public static volatile boolean isRenderingLocalShield = false;
     public static volatile boolean isFirstPersonShield = false;
+    public static volatile boolean isChestplateFullyHidden = false;
 
     public static boolean isSkullsAndBlocksVisible() {
         return config == null || config.showSkullsAndBlocks;

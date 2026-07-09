@@ -1,5 +1,6 @@
 package com.example.hidearmor.mixin;
 
+import com.example.hidearmor.HideArmorMod;
 import com.example.hidearmor.LocalPlayerTracker;
 import com.mojang.blaze3d.vertex.PoseStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +24,9 @@ public class PlayerRendererMixin {
     @Inject(method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"))
     private void onPreRender(LivingEntityRenderState state, PoseStack matrices,
             SubmitNodeCollector queue, CameraRenderState cameraState, CallbackInfo ci) {
+        // Reset FemaleGenderMod compat flag each frame
+        HideArmorMod.isChestplateFullyHidden = false;
+
         if (state instanceof AvatarRenderState playerState) {
             var client = Minecraft.getInstance();
             if (client.player != null) {

@@ -12,6 +12,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class HideArmorClient implements ClientModInitializer {
     public static KeyMapping toggleKey;
+    private static int syncTickCounter = 0;
 
     @Override
     public void onInitializeClient() {
@@ -23,6 +24,7 @@ public class HideArmorClient implements ClientModInitializer {
         // --- Clear cache on disconnect ---
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             PlayerConfigCache.clear();
+            syncTickCounter = 0;
         });
 
         // --- Keybind ---
@@ -31,7 +33,7 @@ public class HideArmorClient implements ClientModInitializer {
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 KeyMapping.Category.register(Identifier.fromNamespaceAndPath("hidearmor", "main"))));
-        // --- Keybind listener ---
+        // --- Keybind listener + periodic sync broadcast ---
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 if (client.player != null) {
@@ -40,6 +42,15 @@ public class HideArmorClient implements ClientModInitializer {
                     } else if (client.gui.screen() == null) {
                         client.gui.setScreen(new HideArmorScreen(null));
                     }
+                }
+            }
+
+            // Periodic broadcast every 100 ticks (5 seconds) to sync with late joiners
+            if (client.player != null && client.level != null) {
+                syncTickCounter++;
+                if (syncTickCounter >= 100) {
+                    syncTickCounter = 0;
+                    broadcastConfig();
                 }
             }
         });
