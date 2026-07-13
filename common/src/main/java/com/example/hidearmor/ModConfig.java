@@ -2,7 +2,6 @@ package com.example.hidearmor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -13,30 +12,24 @@ import java.util.List;
 
 public class ModConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final File CONFIG_FILE = new File(FabricLoader.getInstance().getConfigDir().toFile(),
-            "hidearmor.json");
 
     public float helmetOpacity = 1.0f;
     public float chestplateOpacity = 1.0f;
     public float leggingsOpacity = 1.0f;
     public float bootsOpacity = 1.0f;
     public float shieldOpacity = 1.0f;
-    // Toggle visibility for special items
     public boolean showElytra = true;
     public boolean showSkullsAndBlocks = true;
     public boolean enableMultiplayerSync = true;
-    
-    // Enchantment Glint toggles
+
     public boolean showGlintHelmet = true;
     public boolean showGlintChestplate = true;
     public boolean showGlintLeggings = true;
     public boolean showGlintBoots = true;
     public boolean showGlintShield = true;
 
-    // UI Theme
-    public String uiTheme = "Sleek"; // "Cobblestone" or "Sleek"
+    public String uiTheme = "Sleek";
 
-    // Presets
     public List<Preset> presets = new ArrayList<>();
 
     public record Preset(
@@ -74,16 +67,22 @@ public class ModConfig {
     }
 
     public void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_FILE)) {
+        save(HideArmorMod.getConfigDir());
+    }
+
+    public void save(File configDir) {
+        File configFile = new File(configDir, "hidearmor.json");
+        try (FileWriter writer = new FileWriter(configFile)) {
             GSON.toJson(this, writer);
         } catch (IOException e) {
             System.err.println("Failed to save HideArmorMod config: " + e.getMessage());
         }
     }
 
-    public static ModConfig load() {
-        if (CONFIG_FILE.exists()) {
-            try (FileReader reader = new FileReader(CONFIG_FILE)) {
+    public static ModConfig load(File configDir) {
+        File configFile = new File(configDir, "hidearmor.json");
+        if (configFile.exists()) {
+            try (FileReader reader = new FileReader(configFile)) {
                 ModConfig loaded = GSON.fromJson(reader, ModConfig.class);
                 if (loaded.presets == null) loaded.presets = new ArrayList<>();
                 if (loaded.presets.isEmpty()) loaded.initDefaultPresets();

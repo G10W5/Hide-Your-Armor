@@ -5,17 +5,20 @@
 	"mixins": [],
 	"client": [
 		"EquipmentRendererMixin",
-		"HeldItemRendererMixin",
 		"ElytraFeatureRendererMixin",
+		"HeldItemRendererMixin",
 		"HeadFeatureRendererMixin",
-		"PlayerRendererMixin",
-		"WGFMGenderLayerMixin",
-		"WGFMGenderArmorLayerMixin",
-		"BreastPhysicsCompatMixin",
 		"HotbarOverlayMixin",
 		"ItemInHandLayerMixin",
+		"PlayerRendererMixin",
+		"BreastPhysicsCompatMixin",
+		"RenderLayerAccessor",
+		"RenderSetupAccessor",
+		"ShieldEntityModelMixin",
 		"ShieldModelRendererMixin",
-		"ShieldTransparencyMixin"
+		"ShieldTransparencyMixin",
+		"WGFMGenderArmorLayerMixin",
+		"WGFMGenderLayerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

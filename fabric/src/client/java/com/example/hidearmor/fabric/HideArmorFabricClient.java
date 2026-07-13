@@ -1,5 +1,9 @@
-package com.example.hidearmor;
+package com.example.hidearmor.fabric;
 
+import com.example.hidearmor.HideArmorMod;
+import com.example.hidearmor.HideArmorScreen;
+import com.example.hidearmor.PlayerConfigPayload;
+import com.example.hidearmor.PlayerConfigCache;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
@@ -10,30 +14,29 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-public class HideArmorClient implements ClientModInitializer {
+public class HideArmorFabricClient implements ClientModInitializer {
     public static KeyMapping toggleKey;
     private static int syncTickCounter = 0;
 
     @Override
     public void onInitializeClient() {
-        // --- Client-side receiver: store incoming configs in cache ---
+        HideArmorMod.setBroadcastCallback(HideArmorFabricClient::broadcastConfig);
+
         ClientPlayNetworking.registerGlobalReceiver(PlayerConfigPayload.ID, (payload, context) -> {
             PlayerConfigCache.set(payload.playerUuid(), payload.toConfig());
         });
 
-        // --- Clear cache on disconnect ---
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             PlayerConfigCache.clear();
             syncTickCounter = 0;
         });
 
-        // --- Keybind ---
         toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.hidearmor.toggle",
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 KeyMapping.Category.register(Identifier.fromNamespaceAndPath("hidearmor", "main"))));
-        // --- Keybind listener + periodic sync broadcast ---
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 if (client.player != null) {
@@ -45,7 +48,6 @@ public class HideArmorClient implements ClientModInitializer {
                 }
             }
 
-            // Periodic broadcast every 100 ticks (5 seconds) to sync with late joiners
             if (client.player != null && client.level != null) {
                 syncTickCounter++;
                 if (syncTickCounter >= 100) {

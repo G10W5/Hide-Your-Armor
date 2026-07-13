@@ -234,7 +234,7 @@ public class HideArmorScreen extends Screen {
                                 b -> {
                                         config.enableMultiplayerSync = !config.enableMultiplayerSync;
                                         if (config.enableMultiplayerSync)
-                                                HideArmorClient.broadcastConfig();
+                                                HideArmorMod.broadcastConfig();
                                         rebuildWidgets();
                                 }, !config.enableMultiplayerSync, "Multiplayer sync"));
 
@@ -508,7 +508,7 @@ public class HideArmorScreen extends Screen {
         @Override
         public void onClose() {
                 HideArmorMod.getConfig().save();
-                HideArmorClient.broadcastConfig();
+                HideArmorMod.broadcastConfig();
                 super.onClose();
         }
 

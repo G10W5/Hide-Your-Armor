@@ -1,0 +1,25 @@
+plugins {
+    id 'dev.architectury.loom-no-remap'
+    id 'architectury-plugin'
+}
+
+architectury {
+    common("fabric", "neoforge")
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+    implementation "dev.architectury:architectury:${rootProject.architectury_api_version}"
+
+    // Female Gender Mod for compat
+    compileOnly "maven.modrinth:female-gender:5.0.0-Beta.4+26.2"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("hidearmor.mixins.json") {
+        expand "version": project.version
+    }
+}
