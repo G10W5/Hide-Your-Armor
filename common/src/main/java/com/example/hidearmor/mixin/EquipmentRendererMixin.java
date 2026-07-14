@@ -47,6 +47,10 @@ public class EquipmentRendererMixin {
         if (slot == null)
             return 1.0f;
 
+        // Elytra is controlled separately by showElytra toggle, not chestplate opacity
+        if (stack.is(Items.ELYTRA))
+            return 1.0f;
+
         switch (slot) {
             case HEAD:
                 return cfg.helmetOpacity;
