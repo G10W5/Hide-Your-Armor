@@ -46,12 +46,20 @@ public class HideArmorMod {
         return config != null ? config.shieldOpacity : 1.0f;
     }
 
-    public static boolean isElytraVisible() {
-        return config == null || config.showElytra;
+    public static float getElytraOpacity() {
+        return config != null ? config.elytraOpacity : 1.0f;
     }
 
-    public static boolean isSkullsAndBlocksVisible() {
-        return config == null || config.showSkullsAndBlocks;
+    public static float getSkullsAndBlocksOpacity() {
+        return config != null ? config.skullsAndBlocksOpacity : 1.0f;
+    }
+
+    public static float getCapeOpacity() {
+        return config != null ? config.capeOpacity : 1.0f;
+    }
+
+    public static float getTrimOpacity() {
+        return config != null ? config.trimOpacity : 1.0f;
     }
 
     private static Runnable broadcastCallback;

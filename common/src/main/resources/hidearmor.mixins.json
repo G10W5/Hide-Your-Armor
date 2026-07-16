@@ -11,6 +11,7 @@
 		"HotbarOverlayMixin",
 		"ItemInHandLayerMixin",
 		"PlayerRendererMixin",
+		"CapeRendererMixin",
 		"BreastPhysicsCompatMixin",
 		"RenderLayerAccessor",
 		"RenderSetupAccessor",

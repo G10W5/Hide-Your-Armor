@@ -19,8 +19,10 @@ public record PlayerConfigPayload(
         float leggingsOpacity,
         float bootsOpacity,
         float shieldOpacity,
-        boolean showElytra,
-        boolean showSkullsAndBlocks,
+        float elytraOpacity,
+        float skullsAndBlocksOpacity,
+        float capeOpacity,
+        float trimOpacity,
         boolean showGlintHelmet,
         boolean showGlintChestplate,
         boolean showGlintLeggings,
@@ -40,8 +42,10 @@ public record PlayerConfigPayload(
         buf.writeFloat(payload.leggingsOpacity);
         buf.writeFloat(payload.bootsOpacity);
         buf.writeFloat(payload.shieldOpacity);
-        buf.writeBoolean(payload.showElytra);
-        buf.writeBoolean(payload.showSkullsAndBlocks);
+        buf.writeFloat(payload.elytraOpacity);
+        buf.writeFloat(payload.skullsAndBlocksOpacity);
+        buf.writeFloat(payload.capeOpacity);
+        buf.writeFloat(payload.trimOpacity);
         buf.writeBoolean(payload.showGlintHelmet);
         buf.writeBoolean(payload.showGlintChestplate);
         buf.writeBoolean(payload.showGlintLeggings);
@@ -57,8 +61,10 @@ public record PlayerConfigPayload(
                 buf.readFloat(),
                 buf.readFloat(),
                 buf.readFloat(),
-                buf.readBoolean(),
-                buf.readBoolean(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
+                buf.readFloat(),
                 buf.readBoolean(),
                 buf.readBoolean(),
                 buf.readBoolean(),
@@ -75,8 +81,10 @@ public record PlayerConfigPayload(
                 config.leggingsOpacity,
                 config.bootsOpacity,
                 config.shieldOpacity,
-                config.showElytra,
-                config.showSkullsAndBlocks,
+                config.elytraOpacity,
+                config.skullsAndBlocksOpacity,
+                config.capeOpacity,
+                config.trimOpacity,
                 config.showGlintHelmet,
                 config.showGlintChestplate,
                 config.showGlintLeggings,
@@ -92,8 +100,10 @@ public record PlayerConfigPayload(
         cfg.leggingsOpacity = this.leggingsOpacity;
         cfg.bootsOpacity = this.bootsOpacity;
         cfg.shieldOpacity = this.shieldOpacity;
-        cfg.showElytra = this.showElytra;
-        cfg.showSkullsAndBlocks = this.showSkullsAndBlocks;
+        cfg.elytraOpacity = this.elytraOpacity;
+        cfg.skullsAndBlocksOpacity = this.skullsAndBlocksOpacity;
+        cfg.capeOpacity = this.capeOpacity;
+        cfg.trimOpacity = this.trimOpacity;
         cfg.showGlintHelmet = this.showGlintHelmet;
         cfg.showGlintChestplate = this.showGlintChestplate;
         cfg.showGlintLeggings = this.showGlintLeggings;

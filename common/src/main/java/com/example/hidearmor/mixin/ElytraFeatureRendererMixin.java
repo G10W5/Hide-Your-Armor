@@ -17,9 +17,11 @@ public class ElytraFeatureRendererMixin {
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At("HEAD"), cancellable = true)
     private void onRenderElytra(PoseStack matrices, SubmitNodeCollector queue, int light,
             HumanoidRenderState state, float limbAngle, float limbDistance, CallbackInfo ci) {
-        // Only hide elytra for the local player
-        if (LocalPlayerTracker.isRenderingLocalPlayer() && !HideArmorMod.isElytraVisible()) {
-            ci.cancel();
+        if (LocalPlayerTracker.isRenderingLocalPlayer()) {
+            float opacity = HideArmorMod.getElytraOpacity();
+            if (opacity <= 0.0f) {
+                ci.cancel();
+            }
         }
     }
 }

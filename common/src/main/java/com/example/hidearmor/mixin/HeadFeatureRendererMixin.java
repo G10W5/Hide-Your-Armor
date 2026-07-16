@@ -17,9 +17,11 @@ public class HeadFeatureRendererMixin {
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At("HEAD"), cancellable = true)
     private void onRenderHead(PoseStack matrices, SubmitNodeCollector queue, int light,
             LivingEntityRenderState state, float limbAngle, float limbDistance, CallbackInfo ci) {
-        // Only hide skull/block helmets for the local player
-        if (LocalPlayerTracker.isRenderingLocalPlayer() && !HideArmorMod.isSkullsAndBlocksVisible()) {
-            ci.cancel();
+        if (LocalPlayerTracker.isRenderingLocalPlayer()) {
+            float opacity = HideArmorMod.getSkullsAndBlocksOpacity();
+            if (opacity <= 0.0f) {
+                ci.cancel();
+            }
         }
     }
 }

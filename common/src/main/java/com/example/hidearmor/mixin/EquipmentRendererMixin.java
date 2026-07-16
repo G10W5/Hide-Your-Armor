@@ -116,8 +116,12 @@ public class EquipmentRendererMixin {
     @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Sheets;armorTrimsSheet(Z)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
     private RenderType modifyTrimLayer(boolean decal, Operation<RenderType> original,
             EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> model, Object state, ItemStack stack) {
-        float opacity = getOpacity(stack);
-        if (opacity < 1.0f && opacity > 0.0f) {
+        float armorOpacity = getOpacity(stack);
+        float trimOpacity = HideArmorMod.getTrimOpacity();
+        if (armorOpacity <= 0.0f || trimOpacity <= 0.0f) {
+            return RenderTypes.armorTranslucent(Sheets.ARMOR_TRIMS_SHEET);
+        }
+        if ((armorOpacity < 1.0f || trimOpacity < 1.0f) && trimOpacity < 1.0f) {
             return RenderTypes.armorTranslucent(Sheets.ARMOR_TRIMS_SHEET);
         }
         return original.call(decal);
@@ -133,6 +137,22 @@ public class EquipmentRendererMixin {
             ItemStack stack) {
         float opacity = getOpacity(stack);
 
+        // Detect trim layer: if the RenderType contains "trim", apply trimOpacity
+        boolean isTrimLayer = layer.toString().toLowerCase().contains("trim");
+        if (isTrimLayer) {
+            float trimOpacity = HideArmorMod.getTrimOpacity();
+            if (trimOpacity <= 0.0f)
+                return; // trims invisible
+            if (trimOpacity < 1.0f) {
+                int trimAlpha = (int) (trimOpacity * 255.0f);
+                int modifiedColor = ARGB.color(trimAlpha, ARGB.red(color), ARGB.green(color), ARGB.blue(color));
+                original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, sprite, unknown1, crumbling);
+                return;
+            }
+            original.call(queue, model, state, matrices, layer, light, overlay, color, sprite, unknown1, crumbling);
+            return;
+        }
+
         // Set flag for FemaleGenderMod compat: when chestplate is fully hidden,
         // BreastPhysics should override tightness to 0 so breasts stay full size
         if (opacity <= 0.0f && LocalPlayerTracker.isRenderingLocalPlayer()) {
@@ -146,7 +166,6 @@ public class EquipmentRendererMixin {
             return; // invisible
 
         // Check if this is a glint layer call — skip if glint is disabled
-        // The glint RenderLayer name typically contains "glint"
         String layerName = layer.toString();
         if (layerName.contains("glint") && !getShowGlint(stack)) {
             return; // suppress glint rendering

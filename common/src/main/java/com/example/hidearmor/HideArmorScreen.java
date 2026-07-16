@@ -15,7 +15,7 @@ import net.minecraft.world.item.Items;
 
 public class HideArmorScreen extends Screen {
         private enum ActiveTab {
-                ARMOR, OFFHAND
+                ARMOR, OFFHAND, MISC
         }
 
         private ActiveTab activeTab = ActiveTab.ARMOR;
@@ -27,8 +27,6 @@ public class HideArmorScreen extends Screen {
         private static final int SLIDER_W = 130;
         private static final int SPACING = 24;
         private static final int SLIDER_TOP = 40;
-        private static final int TOGGLE_TOP = 145;
-        private static final int ICON_TOP = 157;
         private static final int DONE_TOP = PANEL_H - 24;
 
         // Preset strip layout (separate panel above main)
@@ -136,6 +134,11 @@ public class HideArmorScreen extends Screen {
                                         activeTab = ActiveTab.OFFHAND;
                                         rebuildWidgets();
                                 }, false));
+                this.addRenderableWidget(new ToggleIconButton(contentX + tabGap * 2, py + 6, tabW, tabW, Items.MAP,
+                                activeTab == ActiveTab.MISC, b -> {
+                                        activeTab = ActiveTab.MISC;
+                                        rebuildWidgets();
+                                }, false));
 
                 // ---- Preset strip buttons (in the separate strip panel) ----
                 int psX = presetStripX() + 8;
@@ -205,31 +208,31 @@ public class HideArmorScreen extends Screen {
                                 config.showGlintBoots = !config.showGlintBoots;
                                 rebuildWidgets();
                         });
-                } else {
+                } else if (activeTab == ActiveTab.OFFHAND) {
                         addSlider(sliderX, iconX, sliderY, "gui.hidearmor.shield", Items.SHIELD,
                                         config.shieldOpacity, v -> config.shieldOpacity = v.floatValue());
                         addGlintToggle(glintBtnX, sliderY, config.showGlintShield, b -> {
                                 config.showGlintShield = !config.showGlintShield;
                                 rebuildWidgets();
                         });
+                } else if (activeTab == ActiveTab.MISC) {
+                        addSlider(sliderX, iconX, sliderY, "gui.hidearmor.elytra", Items.ELYTRA,
+                                        config.elytraOpacity, v -> config.elytraOpacity = v.floatValue());
+
+                        addSlider(sliderX, iconX, sliderY + SPACING, "gui.hidearmor.skulls", Items.SKELETON_SKULL,
+                                        config.skullsAndBlocksOpacity, v -> config.skullsAndBlocksOpacity = v.floatValue());
+
+                        addSlider(sliderX, iconX, sliderY + SPACING * 2, "gui.hidearmor.cape", Items.PAPER,
+                                        config.capeOpacity, v -> config.capeOpacity = v.floatValue());
+
+                        addSlider(sliderX, iconX, sliderY + SPACING * 3, "gui.hidearmor.trim", Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE,
+                                        config.trimOpacity, v -> config.trimOpacity = v.floatValue());
                 }
 
-                // ---- Visibility toggles ----
-                int iconY = py + ICON_TOP;
-                int iconGap = 28;
-                this.addRenderableWidget(new TooltipToggleIconButton(contentX, iconY, 24, 24, Items.SKELETON_SKULL,
-                                !config.showSkullsAndBlocks, b -> {
-                                        config.showSkullsAndBlocks = !config.showSkullsAndBlocks;
-                                        rebuildWidgets();
-                                }, !config.showSkullsAndBlocks,
-                                Component.translatable("gui.hidearmor.tooltip.skull").getString()));
-                this.addRenderableWidget(new TooltipToggleIconButton(contentX + iconGap, iconY, 24, 24, Items.ELYTRA,
-                                !config.showElytra, b -> {
-                                        config.showElytra = !config.showElytra;
-                                        rebuildWidgets();
-                                }, !config.showElytra,
-                                Component.translatable("gui.hidearmor.tooltip.elytra").getString()));
-                this.addRenderableWidget(new TooltipToggleIconButton(contentX + iconGap * 2, iconY, 24, 24,
+                // ---- Multiplayer sync toggle (always visible) ----
+                int iconY = py + DONE_TOP;
+                int syncX = px + 80;
+                this.addRenderableWidget(new TooltipToggleIconButton(syncX, iconY, 20, 20,
                                 Items.COMPASS, !config.enableMultiplayerSync,
                                 b -> {
                                         config.enableMultiplayerSync = !config.enableMultiplayerSync;
@@ -359,17 +362,16 @@ public class HideArmorScreen extends Screen {
                 int px = px(), py = py();
                 int contentX = px + 10;
                 int tabGap = 26;
-                int activeTabX = (activeTab == ActiveTab.ARMOR) ? contentX : contentX + tabGap;
 
                 // Active tab underline
+                int activeTabX = contentX + tabGap * activeTab.ordinal();
                 ctx.fill(activeTabX, py + 6 + 22 + 2, activeTabX + 22, py + 6 + 22 + 3, 0xFFFFFFFF);
 
-                // "Visibility" label
-                ctx.text(this.font, "Visibility", contentX, py + TOGGLE_TOP, 0xFF888888, false);
-
-                // "Glint" column header
-                int glintHeaderX = contentX + 20 + SLIDER_W + 6;
-                ctx.text(this.font, "Glint", glintHeaderX, py + 24, 0xFF777777, false);
+                // "Glint" column header (only for ARMOR and OFFHAND tabs)
+                if (activeTab != ActiveTab.MISC) {
+                        int glintHeaderX = contentX + 20 + SLIDER_W + 6;
+                        ctx.text(this.font, "Glint", glintHeaderX, py + 24, 0xFF777777, false);
+                }
 
                 // Item icons next to sliders
                 for (IconInfo info : sliderIcons) {
@@ -396,17 +398,14 @@ public class HideArmorScreen extends Screen {
 
                 if (isSleek) {
                         ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF1A1A1E);
-                        // Border
                         ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + 1, 0xFFFFFFFF);
                         ctx.fill(sx, sy, sx + 1, sy + PRESET_STRIP_H, 0xFFFFFFFF);
                         ctx.fill(sx, sy + PRESET_STRIP_H - 1, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF373737);
                         ctx.fill(sx + PRESET_STRIP_W - 1, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF373737);
-                        // Inner bevel
                         ctx.fill(sx + 1, sy + 1, sx + PRESET_STRIP_W - 1, sy + 2, 0xFFC6C6C6);
                         ctx.fill(sx + 1, sy + 1, sx + 2, sy + PRESET_STRIP_H - 1, 0xFFC6C6C6);
                         ctx.fill(sx + 1, sy + PRESET_STRIP_H - 2, sx + PRESET_STRIP_W - 1, sy + PRESET_STRIP_H - 1, 0xFF8B8B8B);
                         ctx.fill(sx + PRESET_STRIP_W - 2, sy + 1, sx + PRESET_STRIP_W - 1, sy + PRESET_STRIP_H - 1, 0xFF8B8B8B);
-                        // Fill
                         ctx.fill(sx + 2, sy + 2, sx + PRESET_STRIP_W - 2, sy + PRESET_STRIP_H - 2, 0xFF2D2D2D);
                 } else {
                         ctx.fill(sx, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, 0xFF1A1A1E);
@@ -418,7 +417,6 @@ public class HideArmorScreen extends Screen {
                         ctx.fill(sx + PRESET_STRIP_W - 1, sy, sx + PRESET_STRIP_W, sy + PRESET_STRIP_H, borderColor);
                 }
 
-                // "Presets" label at top of strip
                 ctx.text(this.font, "Presets", sx + 8, sy + 4, 0xFF888888, false);
         }
 
@@ -449,14 +447,12 @@ public class HideArmorScreen extends Screen {
                         // Inset backgrounds for slider rows
                         int sliderY = py + SLIDER_TOP;
                         int sliderX = px + 10 + 20;
-                        for (int i = 0; i < 4; i++) {
+                        int sliderCount = (activeTab == ActiveTab.ARMOR) ? 4 : (activeTab == ActiveTab.OFFHAND) ? 1 : 4;
+                        for (int i = 0; i < sliderCount; i++) {
                                 int rowY = sliderY + SPACING * i;
                                 ctx.fill(sliderX - 2, rowY - 1, sliderX + SLIDER_W + 2, rowY + 21, 0xFF191919);
                                 ctx.fill(sliderX - 1, rowY, sliderX + SLIDER_W + 1, rowY + 20, 0xFF222222);
                         }
-
-                        // Horizontal separator above visibility section
-                        ctx.fill(px + 6, py + TOGGLE_TOP - 5, px + LEFT_W - 6, py + TOGGLE_TOP - 4, 0xFF4A4A54);
 
                         // Vertical divider
                         ctx.fill(px + LEFT_W - 1, py + 4, px + LEFT_W, py + PANEL_H - 4, 0xFF191919);
@@ -494,14 +490,12 @@ public class HideArmorScreen extends Screen {
                 int popupX = cx - popupW / 2;
                 int popupY = cy - popupH / 2;
 
-                // Popup background
                 ctx.fill(popupX, popupY, popupX + popupW, popupY + popupH, 0xFF1A1A1E);
                 ctx.fill(popupX, popupY, popupX + popupW, popupY + 1, 0xFFFFFFFF);
                 ctx.fill(popupX, popupY, popupX + 1, popupY + popupH, 0xFFFFFFFF);
                 ctx.fill(popupX, popupY + popupH - 1, popupX + popupW, popupY + popupH, 0xFF373737);
                 ctx.fill(popupX + popupW - 1, popupY, popupX + popupW, popupY + popupH, 0xFF373737);
 
-                // Title
                 ctx.text(this.font, "Name Preset", popupX + 10, popupY + 8, 0xFFCCCCCC, false);
         }
 
@@ -571,15 +565,11 @@ public class HideArmorScreen extends Screen {
 
                 private int getDeleteablePresetIndex() {
                         ModConfig config = HideArmorMod.getConfig();
-                        // Find which deletable preset this button represents
-                        int deletableCount = 0;
                         for (int i = 0; i < config.presets.size(); i++) {
                                 if (!config.presets.get(i).isDefault()) {
-                                        // Match by label text (the number)
                                         if (this.label.equals(String.valueOf(i + 1))) {
                                                 return i;
                                         }
-                                        deletableCount++;
                                 }
                         }
                         return -1;
