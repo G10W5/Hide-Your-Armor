@@ -18,6 +18,7 @@
 		"ShieldEntityModelMixin",
 		"ShieldModelRendererMixin",
 		"ShieldTransparencyMixin",
+		"SkullBlockRendererMixin",
 		"WGFMGenderArmorLayerMixin",
 		"WGFMGenderLayerMixin"
 	],
