@@ -47,9 +47,9 @@ public class EquipmentRendererMixin {
         if (slot == null)
             return 1.0f;
 
-        // Elytra is controlled separately by the elytra opacity slider
+        // Elytra is controlled separately by showElytra toggle, not chestplate opacity
         if (stack.is(Items.ELYTRA))
-            return HideArmorMod.getElytraOpacity();
+            return 1.0f;
 
         switch (slot) {
             case HEAD:
