@@ -11,63 +11,84 @@
   <a href="https://github.com/G10W5/Hide-Your-Armor/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/G10W5/Hide-Your-Armor/gradle.yml?branch=main&style=for-the-badge" alt="Build Status" />
   </a>
-  <img src="https://img.shields.io/badge/Minecraft-26.1%20%2F%201.21.11-darkgreen?style=for-the-badge" alt="Minecraft Version" />
-  <img src="https://img.shields.io/badge/Loader-Fabric-blue?style=for-the-badge" alt="Fabric Loader" />
+  <img src="https://img.shields.io/badge/Minecraft-26.2-darkgreen?style=for-the-badge" alt="Minecraft Version" />
+  <img src="https://img.shields.io/badge/Loader-Fabric%20%2B%20NeoForge-blue?style=for-the-badge" alt="Loader" />
 </p>
 
-A premium, highly customizable client-side utility mod that grants complete control over the visibility, opacity, and rendering effects of your armor, accessories, and shield slots in real-time.
+Client-side mod for hiding or fading your armor. Works locally by default, and optionally syncs to other players if the server has it too.
 
 ---
 
-## 🌟 Features
+## Features
 
-### 🎛️ Granular Opacity Sliders
-Don’t settle for binary toggles. Adjust your transparency level dynamically from **0%** (fully hidden) to **100%** (fully visible) with instant feedback in our non-pausing preview UI.
+**Opacity, not just on/off**
+Every piece has a slider from 0% to 100%. Drag it and see the change instantly on the preview doll. No need to re-equip anything.
 
-### 📑 Tabbed Interface Categories
-*   **🛡️ Armor Configuration**: Opacity controls mapped individually for Helmet, Chestplate, Leggings, and Boots.
-*   **⚔️ Off-Hand Shield Configuration**: Seamlessly toggle visibility for held shields.
+* **Armor** – Helmet, Chestplate, Leggings, Boots each have their own slider
+* **Shield** – Off-hand shield opacity
+* **Misc** – Elytra, Skulls & blocks worn on head, Capes, and Armor trims
+* **Enchantment glint** – Toggle the glint separately for each armor piece and the shield
 
-### 🎭 Specialized Accessory Options
-*   **🪶 Elytra Toggle**: Hide or display wings without having to unequip them.
-*   **💀 Skulls & Blocks**: Adjust the visibility of decorative vanity head items.
-*   **🧬 WGFM (Wildfire Female Gender Mod) Support**: Transparent armor adjustments map automatically onto custom model breast armor layers. Control glint directly on custom body meshes.
+<p align="center">
+  <img src="docs/preview.gif" alt="Preview" width="700" />
+</p>
 
-### 📡 Multiplayer Synchronization
-Opt-in to broadcasting your configurations by toggling the in-game **Compass** switch. Other players running the mod will instantly view you with your customized armor opacities.
+**Three tabs**
+Armor / Offhand / Misc. Misc uses the map icon – that's where the elytra/cape/trim stuff lives.
+
+**Live preview**
+The config screen doesn't pause the game. You can spin the preview model and it updates in real time. Settings save to `config/hidearmor.json` when you close the screen.
+
+**Presets**
+Save your current sliders as a preset and apply it later. Right-click a preset to delete it.
+
+**Wildfire Female Gender Mod compat**
+If you use WGFM, breast armor layers follow your chestplate opacity and the glint toggles work on those meshes too.
 
 ---
 
-## 🎮 In-Game Controls & Interface
+## Controls
 
-1. **Open the Config Screen**: Press `H` (default bind) anywhere in-game.
-2. **Real-time Preview**: Modify sliders and toggles with a active side-by-side view of your avatar.
-3. **Save System**: All settings save automatically on screen closure to `config/hidearmor.json`.
+* **H** – open Hide Your Armor (rebindable in Controls)
+* While the screen is open: drag sliders, toggle glint, switch tabs. Hit `Esc` to close and save.
 
 ---
 
-## 🌐 Multiplayer Behavior Matrix
+## Multiplayer
 
-| Client Setup | Server Mod Status | Synced Opacities? |
+The mod is client-side only. You can join vanilla servers fine – your settings just stay local.
+
+If you want others to see you the way you configured it, turn on **Multiplayer Sync** (compass icon in the top-right of the config screen). When enabled, your config is sent to the server and the server relays it to other players who also have the mod.
+
+| You | Server | Others see your opacity? |
 | :--- | :--- | :---: |
-| **Singleplayer / LAN** | Local | ✅ **Yes** |
-| **Modded Server** | Mod Installed Server-side | ✅ **Yes** |
-| **Vanilla Server** | Mod Not Installed | ❌ **No (Settings stay local)** |
+| Singleplayer / LAN | – | Yes |
+| Modded server | Mod installed | Yes |
+| Vanilla / no mod | Not installed | No – stays local |
 
-> [!IMPORTANT]
-> Players without this mod installed will simply see standard, opaque armor models. No server conflicts, crashes, or data issues occur on vanilla setups.
-
----
-
-## 📥 Installation
-
-1. Make sure you are using **Minecraft 1.21.11 / 26.1** running the **Fabric Loader**.
-2. Download the latest release `.jar` from the [Releases Tab](https://github.com/G10W5/Hide-Your-Armor/releases).
-3. Drop the file inside your `.minecraft/mods` directory.
-4. *(Optional but Recommended)* Add **Fabric API** to enable full cross-dependency features.
+Players without the mod just see normal armor. No crashes or desyncs.
 
 ---
 
-## 📜 License & Credits
+## Installation
 
-Distributed under the **MIT License**. Check out [LICENSE](LICENSE) for more details.
+Universal jar works on both loaders (built with Architectury + Forgix).
+
+1. **Fabric:** Minecraft 26.2 + Fabric Loader + Fabric API
+2. **NeoForge:** Minecraft 26.2 + NeoForge 26.2.0.8-beta or newer
+
+Download `HideYourArmor-1.6.0-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
+
+Fabric API is required on Fabric. No extra dependencies on NeoForge.
+
+---
+
+## Config & Commands
+
+No commands. Config lives at `config/hidearmor.json` and is edited in-game. You can back it up or delete it to reset.
+
+---
+
+## License
+
+MIT – see [LICENSE](LICENSE).
