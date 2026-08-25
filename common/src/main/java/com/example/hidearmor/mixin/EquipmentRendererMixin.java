@@ -47,9 +47,9 @@ public class EquipmentRendererMixin {
         if (slot == null)
             return 1.0f;
 
-        // Elytra is controlled separately by showElytra toggle, not chestplate opacity
+        // Elytra uses its own slider (supports multiplayer via per-player cache)
         if (stack.is(Items.ELYTRA))
-            return 1.0f;
+            return cfg.elytraOpacity;
 
         switch (slot) {
             case HEAD:
