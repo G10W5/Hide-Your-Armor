@@ -41,10 +41,11 @@ public class HideArmorNeoForge {
 
     private void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         // Channel must be optional so clients can join vanilla servers and
-        // dedicated servers can run without the mod.
+        // dedicated servers can run without the mod. Use bidirectional so the
+        // same ID isn't registered twice (would throw "already registered").
         PayloadRegistrar registrar = event.registrar("1").optional();
-        registrar.playToServer(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC, this::handlePayload);
-        registrar.playToClient(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC, this::handleClientPayload);
+        registrar.playBidirectional(PlayerConfigPayload.ID, PlayerConfigPayload.CODEC,
+                this::handlePayload, this::handleClientPayload);
     }
 
     private void handleClientPayload(PlayerConfigPayload payload, IPayloadContext context) {
