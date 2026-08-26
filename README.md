@@ -77,7 +77,7 @@ Universal jar works on both loaders (built with Architectury + Forgix).
 1. **Fabric:** Minecraft 26.2 + Fabric Loader + Fabric API
 2. **NeoForge:** Minecraft 26.2 + NeoForge 26.2.0.8-beta or newer
 
-Download `HideYourArmor-1.6.0-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
+Download `HideYourArmor-1.6.1-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
 
 Fabric API is required on Fabric. No extra dependencies on NeoForge.
 
