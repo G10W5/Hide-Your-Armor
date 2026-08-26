@@ -65,6 +65,10 @@ public class HideArmorFabricClient implements ClientModInitializer {
         var client = net.minecraft.client.Minecraft.getInstance();
         if (client.player == null)
             return;
+        // Don't send to vanilla servers that don't have the channel
+        if (!ClientPlayNetworking.canSend(PlayerConfigPayload.ID)) {
+            return;
+        }
         ClientPlayNetworking.send(PlayerConfigPayload.from(client.player.getUUID(), HideArmorMod.getConfig()));
     }
 }

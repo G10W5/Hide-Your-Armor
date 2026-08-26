@@ -59,9 +59,20 @@ public class NeoForgeClientHandler {
             return;
 
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null) return;
+        if (mc.player == null || mc.level == null || mc.getConnection() == null) return;
+
+        // Don't try to send to vanilla servers (e.g. Hypixel) that don't have the channel – would throw
+        // UnsupportedOperationException: Payload hidearmor:sync may not be sent to the server!
+        if (!net.neoforged.neoforge.network.registration.NetworkRegistry.hasChannel(
+                mc.getConnection(), PlayerConfigPayload.ID.id())) {
+            return;
+        }
 
         PlayerConfigPayload payload = PlayerConfigPayload.from(mc.player.getUUID(), HideArmorMod.getConfig());
-        ClientPacketDistributor.sendToServer(payload);
+        try {
+            ClientPacketDistributor.sendToServer(payload);
+        } catch (UnsupportedOperationException ignored) {
+            // Vanilla / non-modded server – ignore
+        }
     }
 }
