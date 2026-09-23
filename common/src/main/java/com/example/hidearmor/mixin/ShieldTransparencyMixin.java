@@ -5,8 +5,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
-import net.minecraft.client.renderer.feature.submit.TranslucentSubmit;
+import net.minecraft.client.renderer.feature.phase.FeatureRenderPhase;
+import net.minecraft.client.renderer.feature.submit.SubmitNode;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,11 +38,11 @@ public class ShieldTransparencyMixin {
             method = "submitModel",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/feature/phase/TranslucentFeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/TranslucentSubmit;)V"
+                    target = "Lnet/minecraft/client/renderer/feature/phase/FeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/SubmitNode;)V"
             )
     )
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void wrapModelSubmit(TranslucentFeatureRenderPhase phase, TranslucentSubmit submit, Operation<Void> original) {
+    private void wrapModelSubmit(FeatureRenderPhase phase, SubmitNode submit, Operation<Void> original) {
         if (!(submit instanceof ModelFeatureRenderer.Submit<?> modelSubmit)) {
             original.call(phase, submit);
             return;
@@ -71,6 +71,6 @@ public class ShieldTransparencyMixin {
                 modelSubmit.uvMapping(), modelSubmit.sheetedDecalPose()
         );
 
-        original.call(phase, (TranslucentSubmit) modified);
+        original.call(phase, (SubmitNode) modified);
     }
 }
