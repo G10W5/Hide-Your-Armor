@@ -4,10 +4,13 @@ import com.example.hidearmor.HideArmorMod;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.model.object.equipment.ShieldModel;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.feature.phase.FeatureRenderPhase;
 import net.minecraft.client.renderer.feature.submit.SubmitNode;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -60,10 +63,16 @@ public class ShieldTransparencyMixin {
         int alpha = (int) (opacity * 255.0f);
         int modifiedColor = (modelSubmit.tintedColor() & 0x00FFFFFF) | (alpha << 24);
 
-        // 26.3: Submit carries uvMapping instead of a sprite; the RenderType was
-        // already swapped to entityTranslucent by ShieldEntityModelMixin for local
-        // shields, so keep it and only patch the tinted color alpha.
+        // 26.3: shield submits use sprite-backed cutout types and never call
+        // Model.renderType(Identifier), so ShieldEntityModelMixin can't swap them.
+        // Swap non-glint shield submits to a blending type here instead, using the
+        // shield atlas (same pattern vanilla uses for entitySolidGlint). Without a
+        // blending RenderType the patched alpha would be ignored (pop-in).
         RenderType translucentType = modelSubmit.renderType();
+        if (modelSubmit.model() instanceof ShieldModel
+                && !translucentType.toString().contains("glint")) {
+            translucentType = RenderTypes.entityTranslucent(Sheets.SHIELD_BASE.atlasLocation());
+        }
 
         var modified = new ModelFeatureRenderer.Submit(
                 translucentType, modelSubmit.pose(), modelSubmit.model(), modelSubmit.state(),
