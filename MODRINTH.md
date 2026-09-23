@@ -78,8 +78,8 @@ A single universal JAR works on both **Fabric** and **NeoForge** mod loaders, po
 
 ## Requirements
 
-- Minecraft 26.2
-- Fabric Loader 0.19.3+ or NeoForge 26.2+
+- Minecraft 26.3
+- Fabric Loader 0.19.5+ or NeoForge 26.3+
 - Java 25+
 
 ## Notes

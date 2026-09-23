@@ -13,7 +13,6 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
-import org.lwjgl.glfw.GLFW;
 
 public class NeoForgeClientHandler {
     public static KeyMapping toggleKey;
@@ -22,8 +21,7 @@ public class NeoForgeClientHandler {
     public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
         toggleKey = new KeyMapping(
                 "key.hidearmor.toggle",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_H,
+                InputConstants.KEY_H,
                 KeyMapping.Category.register(Identifier.fromNamespaceAndPath("hidearmor", "main")));
         event.register(toggleKey);
     }

@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
 import net.minecraft.client.renderer.feature.submit.TranslucentSubmit;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -61,15 +60,15 @@ public class ShieldTransparencyMixin {
         int alpha = (int) (opacity * 255.0f);
         int modifiedColor = (modelSubmit.tintedColor() & 0x00FFFFFF) | (alpha << 24);
 
+        // 26.3: Submit carries uvMapping instead of a sprite; the RenderType was
+        // already swapped to entityTranslucent by ShieldEntityModelMixin for local
+        // shields, so keep it and only patch the tinted color alpha.
         RenderType translucentType = modelSubmit.renderType();
-        if (modelSubmit.sprite() != null) {
-            translucentType = RenderTypes.entityTranslucent(modelSubmit.sprite().atlasLocation());
-        }
 
         var modified = new ModelFeatureRenderer.Submit(
                 translucentType, modelSubmit.pose(), modelSubmit.model(), modelSubmit.state(),
                 modelSubmit.lightCoords(), modelSubmit.overlayCoords(), modifiedColor,
-                modelSubmit.sprite(), modelSubmit.sheetedDecalPose()
+                modelSubmit.uvMapping(), modelSubmit.sheetedDecalPose()
         );
 
         original.call(phase, (TranslucentSubmit) modified);

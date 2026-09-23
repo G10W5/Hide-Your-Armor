@@ -11,7 +11,7 @@
   <a href="https://github.com/G10W5/Hide-Your-Armor/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/G10W5/Hide-Your-Armor/gradle.yml?branch=main&style=for-the-badge" alt="Build Status" />
   </a>
-  <img src="https://img.shields.io/badge/Minecraft-26.2-darkgreen?style=for-the-badge" alt="Minecraft Version" />
+  <img src="https://img.shields.io/badge/Minecraft-26.3-darkgreen?style=for-the-badge" alt="Minecraft Version" />
   <img src="https://img.shields.io/badge/Loader-Fabric%20%2B%20NeoForge-blue?style=for-the-badge" alt="Loader" />
 </p>
 
@@ -74,10 +74,10 @@ Players without the mod just see normal armor. No crashes or desyncs.
 
 Universal jar works on both loaders (built with Architectury + Forgix).
 
-1. **Fabric:** Minecraft 26.2 + Fabric Loader + Fabric API
-2. **NeoForge:** Minecraft 26.2 + NeoForge 26.2.0.8-beta or newer
+1. **Fabric:** Minecraft 26.3 + Fabric Loader + Fabric API
+2. **NeoForge:** Minecraft 26.3 + NeoForge 26.3.0.10-beta or newer
 
-Download `HideYourArmor-1.6.1-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
+Download `HideYourArmor-1.7.0-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
 
 Fabric API is required on Fabric. No extra dependencies on NeoForge.
 

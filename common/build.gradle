@@ -13,7 +13,7 @@ dependencies {
     implementation "dev.architectury:architectury:${rootProject.architectury_api_version}"
 
     // Female Gender Mod for compat
-    compileOnly "maven.modrinth:female-gender:5.0.0-Beta.4+26.2"
+    compileOnly "maven.modrinth:female-gender:5.0.0-Beta.5+mc26.3-fabric"
 }
 
 processResources {

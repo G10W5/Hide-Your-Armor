@@ -7,12 +7,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.UvMapping;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
@@ -27,6 +26,14 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(EquipmentLayerRenderer.class)
 public class EquipmentRendererMixin {
+
+    /**
+     * Set by modifyTrimLayer when the trim RenderType is built, read-and-cleared by
+     * injectAlphaToSubmitModel. The trim submitModel call always immediately follows
+     * its armorTrim() call on the render thread, so this reliably tags trim submits
+     * (trim texture paths are no longer guaranteed to contain "trim" in 26.3).
+     */
+    private static final ThreadLocal<Boolean> TRIM_SUBMIT = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     private float getOpacity(ItemStack stack) {
         com.example.hidearmor.ModConfig cfg = LocalPlayerTracker.getConfigForCurrentPlayer();
@@ -108,37 +115,41 @@ public class EquipmentRendererMixin {
         RenderType layer = original.call(texture);
         float opacity = getOpacity(stack);
         if (opacity < 1.0f && opacity > 0.0f) {
-            return RenderTypes.armorTranslucent(texture);
+            // 26.3 removed RenderTypes.armorTranslucent — entityTranslucent blends the same way
+            return RenderTypes.entityTranslucent(texture);
         }
         return layer;
     }
 
-    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Sheets;armorTrimsSheet(Z)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
-    private RenderType modifyTrimLayer(boolean decal, Operation<RenderType> original,
+    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/rendertype/RenderTypes;armorTrim(Lnet/minecraft/resources/Identifier;Z)Lnet/minecraft/client/renderer/rendertype/RenderType;"))
+    private RenderType modifyTrimLayer(Identifier texture, boolean decal, Operation<RenderType> original,
             EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> model, Object state, ItemStack stack) {
+        // Tag the following submitModel call as a trim submit for injectAlphaToSubmitModel
+        TRIM_SUBMIT.set(Boolean.TRUE);
         float armorOpacity = getOpacity(stack);
         float trimOpacity = HideArmorMod.getTrimOpacity();
         if (armorOpacity <= 0.0f || trimOpacity <= 0.0f) {
-            return RenderTypes.armorTranslucent(Sheets.ARMOR_TRIMS_SHEET);
+            return RenderTypes.entityTranslucent(texture);
         }
-        if ((armorOpacity < 1.0f || trimOpacity < 1.0f) && trimOpacity < 1.0f) {
-            return RenderTypes.armorTranslucent(Sheets.ARMOR_TRIMS_SHEET);
+        if (trimOpacity < 1.0f) {
+            return RenderTypes.entityTranslucent(texture);
         }
-        return original.call(decal);
+        return original.call(texture, decal);
     }
 
-    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/TextureAtlasSprite;ILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V"))
+    @WrapOperation(method = "renderLayers(Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lnet/minecraft/world/item/ItemStack;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/resources/Identifier;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/OrderedSubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/texture/UvMapping;I)V"))
     private <S> void injectAlphaToSubmitModel(
             OrderedSubmitNodeCollector queue, Model<? super S> model, S state, PoseStack matrices, RenderType layer,
-            int light, int overlay, int color, TextureAtlasSprite sprite, int unknown1,
-            ModelFeatureRenderer.CrumblingOverlay crumbling,
+            int light, int overlay, int color, UvMapping uvMapping, int outlineColor,
             Operation<Void> original,
             EquipmentClientInfo.LayerType layerType, ResourceKey<?> asset, Model<?> fallbackModel, Object fallbackState,
             ItemStack stack) {
         float opacity = getOpacity(stack);
 
-        // Detect trim layer: if the RenderType contains "trim", apply trimOpacity
-        boolean isTrimLayer = layer.toString().toLowerCase().contains("trim");
+        // Trim submit tagged by modifyTrimLayer (fallback: legacy texture-path check)
+        boolean isTrimLayer = Boolean.TRUE.equals(TRIM_SUBMIT.get())
+                || layer.toString().toLowerCase().contains("trim");
+        TRIM_SUBMIT.remove();
         if (isTrimLayer) {
             float trimOpacity = HideArmorMod.getTrimOpacity();
             if (trimOpacity <= 0.0f)
@@ -146,10 +157,10 @@ public class EquipmentRendererMixin {
             if (trimOpacity < 1.0f) {
                 int trimAlpha = (int) (trimOpacity * 255.0f);
                 int modifiedColor = ARGB.color(trimAlpha, ARGB.red(color), ARGB.green(color), ARGB.blue(color));
-                original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, sprite, unknown1, crumbling);
+                original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, uvMapping, outlineColor);
                 return;
             }
-            original.call(queue, model, state, matrices, layer, light, overlay, color, sprite, unknown1, crumbling);
+            original.call(queue, model, state, matrices, layer, light, overlay, color, uvMapping, outlineColor);
             return;
         }
 
@@ -184,6 +195,6 @@ public class EquipmentRendererMixin {
             modifiedColor = ARGB.color(alpha, ARGB.red(color), ARGB.green(color),
                     ARGB.blue(color));
         }
-        original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, sprite, unknown1, crumbling);
+        original.call(queue, model, state, matrices, layer, light, overlay, modifiedColor, uvMapping, outlineColor);
     }
 }

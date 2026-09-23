@@ -9,7 +9,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
@@ -49,22 +48,22 @@ public class CapeRendererMixin {
 
     @WrapOperation(
         method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V")
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;III)V")
     )
     private <S> void wrapCapeSubmitModel(
             SubmitNodeCollector queue, Model<? super S> model, S state, PoseStack poseStack, RenderType renderType,
-            int light, int overlay, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumbling,
+            int light, int overlay, int outlineColor,
             Operation<Void> original) {
         if (LocalPlayerTracker.isRenderingLocalPlayer()) {
             float opacity = HideArmorMod.getCapeOpacity();
             if (opacity < 1.0f) {
                 int alpha = (int) (opacity * 255.0f);
                 int tintedColor = ARGB.color(alpha, 255, 255, 255);
-                // Bypass the 7-arg default (tintedColor=-1) and call the 10-arg directly with our alpha
-                queue.submitModel(model, state, poseStack, renderType, light, overlay, tintedColor, null, outlineColor, crumbling);
+                // Bypass the 7-arg default (tintedColor=-1) and call the 9-arg directly with our alpha
+                queue.submitModel(model, state, poseStack, renderType, light, overlay, tintedColor, null, outlineColor);
                 return;
             }
         }
-        original.call(queue, model, state, poseStack, renderType, light, overlay, outlineColor, crumbling);
+        original.call(queue, model, state, poseStack, renderType, light, overlay, outlineColor);
     }
 }

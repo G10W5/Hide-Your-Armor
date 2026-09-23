@@ -2,9 +2,10 @@ package com.example.hidearmor.mixin;
 
 import com.example.hidearmor.HideArmorMod;
 import com.wildfire.api.IGenderArmor;
-import com.wildfire.physics.BreastPhysics;
+import com.wildfire.client.physics.BreastPhysics;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
@@ -14,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  * overrides the armor tightness to 0 in BreastPhysics so breasts stay at
  * their full size instead of being shrunk by the armor's tightness value.
  */
+@Pseudo
 @Mixin(BreastPhysics.class)
 public class BreastPhysicsCompatMixin {
 

@@ -12,7 +12,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 public class HideArmorFabricClient implements ClientModInitializer {
     public static KeyMapping toggleKey;
@@ -33,8 +32,7 @@ public class HideArmorFabricClient implements ClientModInitializer {
 
         toggleKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.hidearmor.toggle",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_H,
+                InputConstants.KEY_H,
                 KeyMapping.Category.register(Identifier.fromNamespaceAndPath("hidearmor", "main"))));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {

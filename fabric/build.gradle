@@ -30,7 +30,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
 
     // Female Gender Mod for compat
-    compileOnly "maven.modrinth:female-gender:5.0.0-Beta.4+26.2"
+    compileOnly "maven.modrinth:female-gender:5.0.0-Beta.5+mc26.3-fabric"
 }
 
 processResources {
