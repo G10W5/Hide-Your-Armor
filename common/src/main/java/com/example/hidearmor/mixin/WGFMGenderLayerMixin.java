@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
  * Targets Wildfire's Gender Mod.
  */
 @Pseudo
-@Mixin(targets = "com.wildfire.render.WildfireModelRenderer")
+@Mixin(targets = "com.wildfire.client.render.WildfireModelRenderer")
 public class WGFMGenderLayerMixin {
 
     /**
@@ -21,7 +21,7 @@ public class WGFMGenderLayerMixin {
      * int color)
      * The color parameter is the 3rd integer parameter, so ordinal = 2.
      */
-    @ModifyVariable(method = "renderBox(Lcom/wildfire/render/WildfireModelRenderer$ModelBox;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At("HEAD"), ordinal = 2, argsOnly = true, remap = false)
+    @ModifyVariable(method = "renderBox(Lcom/wildfire/client/render/WildfireModelRenderer$ModelBox;Lcom/mojang/blaze3d/vertex/PoseStack$Pose;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V", at = @At("HEAD"), ordinal = 2, argsOnly = true, remap = false)
     private static int modifyBreastRenderColor(int originalColor) {
         com.example.hidearmor.ModConfig cfg = LocalPlayerTracker.getConfigForCurrentPlayer();
         if (cfg == null) return originalColor;

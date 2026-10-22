@@ -1,84 +1,22 @@
 package com.example.hidearmor.mixin;
 
-import com.example.hidearmor.HideArmorMod;
-import com.example.hidearmor.ShieldBlockingOverlay;
+import com.example.hidearmor.ShieldHotbarOverlay;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Hud.class)
+/**
+ * 26.1.2 draws the hotbar on Gui. On 26.2 the hotbar moved to Hud, so this
+ * mixin silently does nothing there (see HotbarOverlayHudMixin).
+ */
+@Mixin(targets = "net.minecraft.client.gui.Gui")
 public class HotbarOverlayMixin {
 
-    /**
-     * After the hotbar is drawn, overlay the blocking animation on the
-     * offhand shield slot. The overlay alpha scales proportionally with
-     * how hidden the shield is (fully opaque at 0% shield opacity,
-     * invisible at 25%+ shield opacity).
-     */
-    @Inject(method = "extractItemHotbar", at = @At("RETURN"))
+    @Inject(method = "extractItemHotbar", at = @At("RETURN"), require = 0)
     private void onAfterHotbar(GuiGraphicsExtractor ctx, DeltaTracker tracker, CallbackInfo ci) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.gameMode == null) return;
-
-        float shieldOpacity = HideArmorMod.getShieldOpacity();
-        if (shieldOpacity >= 0.25f) return;
-
-        // Only show if offhand item is a shield
-        ItemStack offhand = mc.player.getItemInHand(InteractionHand.OFF_HAND);
-        if (!offhand.is(Items.SHIELD)) return;
-
-        // Detect blocking state
-        boolean blocking = mc.player.isBlocking();
-        ShieldBlockingOverlay.tick(blocking);
-
-        if (!blocking) return;
-
-        float progress = ShieldBlockingOverlay.getProgress();
-        if (progress < 0) return;
-
-        // --- Hotbar layout (vanilla constants) ---
-        int screenW = mc.getWindow().getGuiScaledWidth();
-        int screenH = mc.getWindow().getGuiScaledHeight();
-
-        boolean leftHand = mc.options.mainHand().get() == net.minecraft.world.entity.HumanoidArm.LEFT;
-        int slotX;
-        if (leftHand) {
-            slotX = screenW / 2 + 91 + 3;
-        } else {
-            slotX = screenW / 2 - 91 - 29 + 3;
-        }
-        int slotY = screenH - 23 + 3;
-
-        int itemX = slotX;
-        int itemY = slotY;
-        int itemW = 16;
-        int itemH = 16;
-
-        // Proportional alpha: at 0% shield opacity → full overlay, at 25% → no overlay
-        float overlayStrength = 1.0f - (shieldOpacity / 0.25f);
-        int overlayAlpha = (int) (overlayStrength * 0xAA);
-
-        // Sweep from top: progress goes 0->1 as the dark bar fills downward
-        int sweepH = (int) (itemH * progress);
-
-        if (sweepH > 0) {
-            int overlayColor = (overlayAlpha << 24) | 0x000000;
-            ctx.fill(itemX, itemY, itemX + itemW, itemY + sweepH, overlayColor);
-        }
-
-        // Bright leading edge line, also scaled by overlay strength
-        if (sweepH < itemH) {
-            int edgeAlpha = (int) (overlayStrength * 0xCC);
-            int edgeColor = (edgeAlpha << 24) | 0xFFFFFF;
-            ctx.fill(itemX, itemY + sweepH, itemX + itemW, itemY + sweepH + 1, edgeColor);
-        }
+        ShieldHotbarOverlay.render(ctx);
     }
 }

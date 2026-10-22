@@ -52,7 +52,7 @@ afterEvaluate {
     forgix {
         destinationDirectory = layout.projectDirectory.dir("build/universal")
         archiveClassifier = "universal"
-        archiveVersion = project.mod_version
+        archiveVersion = "${project.mod_version}+mc${rootProject.minecraft_version}"
 
         fabric()
         neoforge {

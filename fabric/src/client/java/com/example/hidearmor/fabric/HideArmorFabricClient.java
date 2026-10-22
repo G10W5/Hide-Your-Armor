@@ -40,10 +40,11 @@ public class HideArmorFabricClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 if (client.player != null) {
-                    if (client.gui.screen() instanceof HideArmorScreen screen) {
+                    net.minecraft.client.gui.screens.Screen current = com.example.hidearmor.ClientScreens.get();
+                    if (current instanceof HideArmorScreen screen) {
                         screen.onClose();
-                    } else if (client.gui.screen() == null) {
-                        client.gui.setScreen(new HideArmorScreen(null));
+                    } else if (current == null) {
+                        com.example.hidearmor.ClientScreens.open(new HideArmorScreen(null));
                     }
                 }
             }

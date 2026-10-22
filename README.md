@@ -1,7 +1,7 @@
-# <img src="src/main/resources/assets/hidearmor/icon.png" width="38" align="center" /> Hide Your Armor
+# <img src="common/src/main/resources/assets/hidearmor/icon.png" width="38" align="center" /> Hide Your Armor
 
 <p align="center">
-  <img src="src/main/resources/assets/hidearmor/textures/gui/banner.png" alt="Hide Your Armor Banner" width="700" />
+  <img src="common/src/main/resources/assets/hidearmor/textures/gui/banner.png" alt="Hide Your Armor Banner" width="700" />
 </p>
 
 <p align="center">
@@ -11,7 +11,7 @@
   <a href="https://github.com/G10W5/Hide-Your-Armor/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/G10W5/Hide-Your-Armor/gradle.yml?branch=main&style=for-the-badge" alt="Build Status" />
   </a>
-  <img src="https://img.shields.io/badge/Minecraft-26.2-darkgreen?style=for-the-badge" alt="Minecraft Version" />
+  <img src="https://img.shields.io/badge/Minecraft-26.1.2%20%7C%2026.2%20%7C%2026.3-darkgreen?style=for-the-badge" alt="Minecraft Version" />
   <img src="https://img.shields.io/badge/Loader-Fabric%20%2B%20NeoForge-blue?style=for-the-badge" alt="Loader" />
 </p>
 
@@ -72,12 +72,17 @@ Players without the mod just see normal armor. No crashes or desyncs.
 
 ## Installation
 
-Universal jar works on both loaders (built with Architectury + Forgix).
+Each jar is universal and works on both Fabric and NeoForge (built with Architectury + Forgix).
 
-1. **Fabric:** Minecraft 26.2 + Fabric Loader + Fabric API
-2. **NeoForge:** Minecraft 26.2 + NeoForge 26.2.0.8-beta or newer
+| Minecraft | File |
+| :--- | :--- |
+| 26.1, 26.1.1, 26.1.2, 26.2 | `HideYourArmor-1.7.1+mc26.1.2-universal.jar` |
+| 26.3 | `HideYourArmor-1.7.1+mc26.3-universal.jar` |
 
-Download `HideYourArmor-1.6.1-universal.jar` from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
+1. **Fabric:** Fabric Loader 0.19.3+ and Fabric API
+2. **NeoForge:** NeoForge 26.1.2+ (26.3+ for the 26.3 jar)
+
+Download the matching file from [Releases](https://github.com/G10W5/Hide-Your-Armor/releases) and drop it in `mods/`.
 
 Fabric API is required on Fabric. No extra dependencies on NeoForge.
 

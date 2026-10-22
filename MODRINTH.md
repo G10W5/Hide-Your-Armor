@@ -68,7 +68,10 @@ Full compatibility with Wildfire's Female Gender Mod:
 - Enchantment glint on breast armor can be toggled independently
 
 ### Multi-Loader Support
-A single universal JAR works on both **Fabric** and **NeoForge** mod loaders, powered by Architectury and Forgix. Just drop the same file into your mods folder regardless of which loader you use.
+Each download is a single universal JAR that works on both **Fabric** and **NeoForge**, powered by Architectury and Forgix. Pick the file that matches your Minecraft version:
+
+- **26.1, 26.1.1, 26.1.2, 26.2** - `HideYourArmor-1.7.1+mc26.1.2-universal.jar`
+- **26.3** - `HideYourArmor-1.7.1+mc26.3-universal.jar`
 
 ### General Compatibility
 - Armor trim mods
@@ -78,8 +81,8 @@ A single universal JAR works on both **Fabric** and **NeoForge** mod loaders, po
 
 ## Requirements
 
-- Minecraft 26.2
-- Fabric Loader 0.19.3+ or NeoForge 26.2+
+- Minecraft 26.1.2 - 26.3 (use the JAR that matches your game version)
+- Fabric Loader 0.19.3+ or NeoForge 26.1.2+
 - Java 25+
 
 ## Notes

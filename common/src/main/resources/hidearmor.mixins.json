@@ -9,6 +9,7 @@
 		"HeldItemRendererMixin",
 		"HeadFeatureRendererMixin",
 		"HotbarOverlayMixin",
+		"HotbarOverlayHudMixin",
 		"ItemInHandLayerMixin",
 		"PlayerRendererMixin",
 		"CapeRendererMixin",
@@ -18,7 +19,6 @@
 		"ShieldEntityModelMixin",
 		"ShieldModelRendererMixin",
 		"ShieldTransparencyMixin",
-		"WGFMGenderArmorLayerMixin",
 		"WGFMGenderLayerMixin"
 	],
 	"injectors": {

@@ -2,8 +2,8 @@ package com.example.hidearmor;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -303,16 +303,45 @@ public class HideArmorScreen extends Screen {
         private net.minecraft.client.gui.components.AbstractWidget addSlider(int sliderX, int iconX, int sliderY,
                         String key, net.minecraft.world.item.Item icon,
                         float init, java.util.function.Consumer<Double> setter) {
-                OptionInstance<Double> option = new OptionInstance<>(key,
-                                OptionInstance.noTooltip(),
-                                (t, v) -> Component.literal(Component.translatable(key).getString().split(" ")[0] + " "
-                                                + (int) (v * 100) + "%"),
-                                OptionInstance.UnitDouble.INSTANCE, (double) init, (val) -> setter.accept(val));
-                net.minecraft.client.gui.components.AbstractWidget widget = option
-                                .createButton(minecraft.options, sliderX, sliderY, SLIDER_W);
+                ConfigSlider widget = new ConfigSlider(sliderX, sliderY, SLIDER_W, key, (double) init, setter);
                 this.addRenderableWidget(widget);
                 sliderIcons.add(new IconInfo(icon, iconX, sliderY + 2));
                 return widget;
+        }
+
+        /**
+         * Plain AbstractSliderButton instead of OptionInstance: OptionInstance's
+         * constructor changed its callback type between 26.1.2 and 26.2, and
+         * AbstractSliderButton is identical in both.
+         */
+        private static class ConfigSlider extends AbstractSliderButton {
+
+                private final String labelKey;
+                private final java.util.function.Consumer<Double> setter;
+
+                ConfigSlider(int x, int y, int w, String labelKey, double initial,
+                                java.util.function.Consumer<Double> setter) {
+                        super(x, y, w, 20, Component.empty(), initial);
+                        this.labelKey = labelKey;
+                        this.setter = setter;
+                        this.updateMessage();
+                }
+
+                @Override
+                protected void updateMessage() {
+                        if (this.labelKey == null) {
+                                return;
+                        }
+                        String label = Component.translatable(this.labelKey).getString().split(" ")[0];
+                        this.setMessage(Component.literal(label + " " + (int) (this.value * 100) + "%"));
+                }
+
+                @Override
+                protected void applyValue() {
+                        if (this.setter != null) {
+                                this.setter.accept(this.value);
+                        }
+                }
         }
 
         // ============================================================

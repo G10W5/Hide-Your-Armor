@@ -1,77 +1,57 @@
 package com.example.hidearmor.mixin;
 
 import com.example.hidearmor.HideArmorMod;
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
-import net.minecraft.client.renderer.feature.submit.TranslucentSubmit;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(net.minecraft.client.renderer.SubmitNodeCollection.class)
+/**
+ * Gradual shield transparency for 26.1.2 / 26.2.
+ *
+ * Shields are submitted through the sprite-based overload, which resolves a
+ * cutout RenderType before reaching SubmitNodeCollection.submitModel. A cutout
+ * type ignores alpha, so fading needs both a blending RenderType and a patched
+ * tint colour. Both are applied here on the model submission itself, which is
+ * the one entry point shared by the first-person, third-person and inventory
+ * shield paths.
+ *
+ * SUBMITTING_LOCAL_SHIELD is set by ShieldModelRendererMixin around
+ * ShieldSpecialRenderer.submit so the patches can't leak onto other models.
+ */
+@Mixin(SubmitNodeCollection.class)
 public class ShieldTransparencyMixin {
 
-    @ModifyExpressionValue(
-            method = "submitModel",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/rendertype/RenderType;hasBlending()Z"
-            )
-    )
-    private boolean forceTranslucentRoute(boolean original) {
-        if (original) {
-            return true;
-        }
-        if (HideArmorMod.isRenderingLocalShield) {
-            float opacity = HideArmorMod.getShieldOpacity();
-            if (opacity > 0.0f && opacity < 1.0f) {
-                return true;
-            }
-        }
-        return false;
-    }
+    static final ThreadLocal<Boolean> SUBMITTING_LOCAL_SHIELD = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
-    @WrapOperation(
-            method = "submitModel",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/feature/phase/TranslucentFeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/TranslucentSubmit;)V"
-            )
-    )
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void wrapModelSubmit(TranslucentFeatureRenderPhase phase, TranslucentSubmit submit, Operation<Void> original) {
-        if (!(submit instanceof ModelFeatureRenderer.Submit<?> modelSubmit)) {
-            original.call(phase, submit);
-            return;
-        }
-        if (!HideArmorMod.isRenderingLocalShield) {
-            original.call(phase, submit);
-            return;
+    static boolean isFadingShield() {
+        if (!Boolean.TRUE.equals(SUBMITTING_LOCAL_SHIELD.get())) {
+            return false;
         }
         float opacity = HideArmorMod.getShieldOpacity();
-        if (opacity <= 0.0f || opacity >= 1.0f) {
-            original.call(phase, submit);
-            return;
+        return opacity > 0.0f && opacity < 1.0f;
+    }
+
+    @ModifyVariable(method = "submitModel", at = @At("HEAD"), argsOnly = true)
+    private RenderType hidearmor$shieldRenderType(RenderType original) {
+        if (!isFadingShield()) {
+            return original;
         }
-
-        int alpha = (int) (opacity * 255.0f);
-        int modifiedColor = (modelSubmit.tintedColor() & 0x00FFFFFF) | (alpha << 24);
-
-        RenderType translucentType = modelSubmit.renderType();
-        if (modelSubmit.sprite() != null) {
-            translucentType = RenderTypes.entityTranslucent(modelSubmit.sprite().atlasLocation());
+        if (original.toString().toLowerCase().contains("glint")) {
+            return original;
         }
+        return RenderTypes.entityTranslucent(Sheets.SHIELD_SHEET);
+    }
 
-        var modified = new ModelFeatureRenderer.Submit(
-                translucentType, modelSubmit.pose(), modelSubmit.model(), modelSubmit.state(),
-                modelSubmit.lightCoords(), modelSubmit.overlayCoords(), modifiedColor,
-                modelSubmit.sprite(), modelSubmit.sheetedDecalPose()
-        );
-
-        original.call(phase, (TranslucentSubmit) modified);
+    @ModifyVariable(method = "submitModel", at = @At("HEAD"), argsOnly = true, ordinal = 2)
+    private int hidearmor$shieldAlpha(int original) {
+        if (!isFadingShield()) {
+            return original;
+        }
+        int alpha = (int) (HideArmorMod.getShieldOpacity() * 255.0f);
+        return (original & 0x00FFFFFF) | (alpha << 24);
     }
 }

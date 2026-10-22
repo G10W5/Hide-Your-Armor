@@ -34,10 +34,11 @@ public class NeoForgeClientHandler {
         if (mc.player == null) return;
 
         while (toggleKey.consumeClick()) {
-            if (mc.gui.screen() instanceof HideArmorScreen screen) {
+            net.minecraft.client.gui.screens.Screen current = com.example.hidearmor.ClientScreens.get();
+            if (current instanceof HideArmorScreen screen) {
                 screen.onClose();
-            } else if (mc.gui.screen() == null) {
-                mc.gui.setScreen(new HideArmorScreen(null));
+            } else if (current == null) {
+                com.example.hidearmor.ClientScreens.open(new HideArmorScreen(null));
             }
         }
 
