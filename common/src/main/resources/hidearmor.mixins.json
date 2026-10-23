@@ -13,8 +13,6 @@
 		"PlayerRendererMixin",
 		"CapeRendererMixin",
 		"BreastPhysicsCompatMixin",
-		"RenderLayerAccessor",
-		"RenderSetupAccessor",
 		"ShieldEntityModelMixin",
 		"ShieldModelRendererMixin",
 		"ShieldTransparencyMixin",
