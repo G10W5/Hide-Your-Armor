@@ -658,21 +658,24 @@ public class HideArmorScreen extends Screen {
 
                 @Override
                 protected void extractContents(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
-                        int bgColor = isHoveredOrFocused() ? 0xFF555555 : 0xFF333333;
-                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bgColor);
-
-                        int borderColor = isHoveredOrFocused() ? 0xFFAAAAAA : 0xFF666666;
-                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + 1, borderColor);
-                        ctx.fill(getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), borderColor);
-                        ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), borderColor);
-                        ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), borderColor);
-
                         int iconSize = 16;
-                        int tint = enabled ? 0xFFFFFFFF : 0xFF666666;
+                        int iconX = getX() + (getWidth() - iconSize) / 2;
+                        int iconY = getY() + (getHeight() - iconSize) / 2;
+                        int tint = enabled ? 0xFFFFFFFF : 0xFFAAAAAA;
                         ctx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, GLOBE_TEXTURE,
-                                        getX() + (getWidth() - iconSize) / 2,
-                                        getY() + (getHeight() - iconSize) / 2,
-                                        0.0f, 0.0f, iconSize, iconSize, 32, 32, tint);
+                                        iconX, iconY, 0.0f, 0.0f, iconSize, iconSize, 16, 16, tint);
+
+                        if (!enabled) {
+                                int x1 = getX() + 2, y1 = getY() + 2;
+                                int x2 = getX() + getWidth() - 2, y2 = getY() + getHeight() - 2;
+                                int dx = x2 - x1, dy = y2 - y1;
+                                for (int i = 0; i < dx; i++) {
+                                        int ry1 = y1 + i * dy / dx;
+                                        int ry2 = y2 - i * dy / dx;
+                                        ctx.fill(x1 + i, ry1, x1 + i + 1, ry1 + 2, 0xEEFF2222);
+                                        ctx.fill(x1 + i, ry2 - 1, x1 + i + 1, ry2 + 1, 0xEEFF2222);
+                                }
+                        }
 
                         if (isHovered()) {
                                 ctx.setTooltipForNextFrame(HideArmorScreen.this.font,
