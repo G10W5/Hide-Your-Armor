@@ -22,5 +22,6 @@
   "gui.hidearmor.presets": "Presets",
   "gui.hidearmor.preset.add": "Create Preset",
   "gui.hidearmor.preset.apply": "Apply Preset",
-  "gui.hidearmor.preset.delete": "Right-click to Delete"
+  "gui.hidearmor.preset.delete": "Right-click to Delete",
+  "gui.hidearmor.global_preset": "Apply current preset to all players"
 }

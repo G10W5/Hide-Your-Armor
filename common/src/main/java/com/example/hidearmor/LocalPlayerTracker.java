@@ -48,6 +48,13 @@ public class LocalPlayerTracker {
         }
         UUID uuid = currentlyRenderingUUID;
         if (uuid != null) {
+            // Global preset: force our current preset onto every other player.
+            // Mobs and armor stands never reach this branch (no UUID), so they
+            // are unaffected.
+            ModConfig local = HideArmorMod.getConfig();
+            if (local != null && local.globalPresetEnabled) {
+                return local;
+            }
             ModConfig cached = PlayerConfigCache.get(uuid);
             if (cached != null)
                 return cached;

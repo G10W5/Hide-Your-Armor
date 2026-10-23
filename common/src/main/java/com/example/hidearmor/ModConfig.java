@@ -32,6 +32,7 @@ public class ModConfig {
     public float capeOpacity = 1.0f;
     public float trimOpacity = 1.0f;
     public boolean enableMultiplayerSync = true;
+    public boolean globalPresetEnabled = false;
 
     public boolean showGlintHelmet = true;
     public boolean showGlintChestplate = true;
@@ -142,6 +143,7 @@ public class ModConfig {
             config.capeOpacity = getFloat(obj, "capeOpacity", 1.0f);
             config.trimOpacity = getFloat(obj, "trimOpacity", 1.0f);
             config.enableMultiplayerSync = getBool(obj, "enableMultiplayerSync", true);
+            config.globalPresetEnabled = getBool(obj, "globalPresetEnabled", false);
 
             config.showGlintHelmet = getBool(obj, "showGlintHelmet", true);
             config.showGlintChestplate = getBool(obj, "showGlintChestplate", true);
