@@ -41,6 +41,7 @@ public class HideArmorScreen extends Screen {
 
         private PlayerPreviewWidget previewWidget;
         private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath("hidearmor", "textures/gui/bg.png");
+        private static final Identifier GLOBE_TEXTURE = Identifier.fromNamespaceAndPath("hidearmor", "textures/gui/globe.png");
 
         // Slider icons
         private record IconInfo(net.minecraft.world.item.Item item, int x, int y) {}
@@ -171,6 +172,14 @@ public class HideArmorScreen extends Screen {
                                         psX, psY, presetBtnSize, presetBtnSize, preset.name()));
                         psX += presetBtnSize + 3;
                 }
+
+                // ---- Global preset toggle (applies this preset to all players) ----
+                psX += 5;
+                this.addRenderableWidget(new GlobeToggleButton(
+                                psX, psY, presetBtnSize, presetBtnSize, config.globalPresetEnabled, b -> {
+                                        config.globalPresetEnabled = !config.globalPresetEnabled;
+                                        rebuildWidgets();
+                                }));
 
                 // ---- Sliders ----
                 int sliderX = contentX + 20;
@@ -604,6 +613,42 @@ public class HideArmorScreen extends Screen {
                                         ctx.fill(x1 + i, ry1, x1 + i + 1, ry1 + 2, 0xEEFF2222);
                                         ctx.fill(x1 + i, ry2 - 1, x1 + i + 1, ry2 + 1, 0xEEFF2222);
                                 }
+                        }
+                }
+        }
+
+        // ============================================================
+        // Globe Toggle Button (global preset)
+        // ============================================================
+        private class GlobeToggleButton extends Button {
+                private final boolean enabled;
+
+                public GlobeToggleButton(int x, int y, int w, int h, boolean enabled, OnPress onPress) {
+                        super(x, y, w, h, Component.nullToEmpty(""), onPress, DEFAULT_NARRATION);
+                        this.enabled = enabled;
+                }
+
+                @Override
+                protected void extractContents(GuiGraphicsExtractor ctx, int mx, int my, float delta) {
+                        int bgColor = isHoveredOrFocused() ? 0xFF555555 : 0xFF333333;
+                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), bgColor);
+
+                        int borderColor = isHoveredOrFocused() ? 0xFFAAAAAA : 0xFF666666;
+                        ctx.fill(getX(), getY(), getX() + getWidth(), getY() + 1, borderColor);
+                        ctx.fill(getX(), getY() + getHeight() - 1, getX() + getWidth(), getY() + getHeight(), borderColor);
+                        ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), borderColor);
+                        ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), borderColor);
+
+                        int iconSize = 12;
+                        int tint = enabled ? 0xFFFFFFFF : 0xFF666666;
+                        ctx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, GLOBE_TEXTURE,
+                                        getX() + (getWidth() - iconSize) / 2,
+                                        getY() + (getHeight() - iconSize) / 2,
+                                        0.0f, 0.0f, iconSize, iconSize, 32, 32, tint);
+
+                        if (isHovered()) {
+                                ctx.setTooltipForNextFrame(HideArmorScreen.this.font,
+                                                Component.translatable("gui.hidearmor.global_preset"), mx, my);
                         }
                 }
         }
