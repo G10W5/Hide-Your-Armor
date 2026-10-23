@@ -33,7 +33,7 @@ Toggle visibility of skull and block items worn on the head slot, such as dragon
 - Create new presets with the **+** button and give them custom names
 - Right-click any custom preset to delete it
 - Presets are saved to your config file and persist across sessions
-- **Global preset** — the globe toggle next to the presets applies your current preset to every player; off by default, and mobs/armor stands are never affected
+- **Global preset** — the globe toggle next to the multiplayer sync (compass) icon applies your current preset to every player; off by default, and mobs/armor stands are never affected
 
 ### Hotbar Blocking Animation
 When your shield opacity is below 25%, a smooth animated overlay appears on the shield's hotbar slot while blocking. The overlay scales proportionally — the more hidden your shield is, the more prominent the blocking animation becomes. This gives you visual feedback that you're blocking even when the shield itself is mostly invisible.

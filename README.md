@@ -43,7 +43,7 @@ The config screen doesn't pause the game. You can spin the preview model and it 
 Save your current sliders as a preset and apply it later. Right-click a preset to delete it.
 
 **Global preset**
-The globe button next to the presets applies your current preset to every player you see. It's off by default; mobs and armor stands are never affected.
+The globe button next to the multiplayer sync (compass) icon applies your current preset to every player you see. It's off by default; mobs and armor stands are never affected.
 
 **Wildfire Female Gender Mod compat**
 If you use WGFM, breast armor layers follow your chestplate opacity and the glint toggles work on those meshes too.
