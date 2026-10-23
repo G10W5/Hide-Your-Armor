@@ -23,13 +23,13 @@ public class ShieldModelRendererMixin {
     private void hidearmor$beginShieldSubmit(DataComponentMap components, PoseStack poseStack,
             SubmitNodeCollector collector, int light, int overlay, boolean leftHand, int color, CallbackInfo ci) {
         if (HideArmorMod.isRenderingLocalShield) {
-            ShieldTransparencyMixin.SUBMITTING_LOCAL_SHIELD.set(true);
+            com.example.hidearmor.ShieldRenderState.beginShieldSubmit();
         }
     }
 
     @Inject(method = SUBMIT, at = @At("RETURN"))
     private void hidearmor$endShieldSubmit(DataComponentMap components, PoseStack poseStack,
             SubmitNodeCollector collector, int light, int overlay, boolean leftHand, int color, CallbackInfo ci) {
-        ShieldTransparencyMixin.SUBMITTING_LOCAL_SHIELD.set(false);
+        com.example.hidearmor.ShieldRenderState.endShieldSubmit();
     }
 }

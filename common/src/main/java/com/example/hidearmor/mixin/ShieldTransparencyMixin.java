@@ -25,10 +25,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(SubmitNodeCollection.class)
 public class ShieldTransparencyMixin {
 
-    static final ThreadLocal<Boolean> SUBMITTING_LOCAL_SHIELD = ThreadLocal.withInitial(() -> Boolean.FALSE);
-
-    static boolean isFadingShield() {
-        if (!Boolean.TRUE.equals(SUBMITTING_LOCAL_SHIELD.get())) {
+    private static boolean isFadingShield() {
+        if (!com.example.hidearmor.ShieldRenderState.isSubmittingLocalShield()) {
             return false;
         }
         float opacity = HideArmorMod.getShieldOpacity();
