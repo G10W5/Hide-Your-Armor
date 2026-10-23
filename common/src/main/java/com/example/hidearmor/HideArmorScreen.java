@@ -173,14 +173,6 @@ public class HideArmorScreen extends Screen {
                         psX += presetBtnSize + 3;
                 }
 
-                // ---- Global preset toggle (applies this preset to all players) ----
-                psX += 5;
-                this.addRenderableWidget(new GlobeToggleButton(
-                                psX, psY, presetBtnSize, presetBtnSize, config.globalPresetEnabled, b -> {
-                                        config.globalPresetEnabled = !config.globalPresetEnabled;
-                                        rebuildWidgets();
-                                }));
-
                 // ---- Sliders ----
                 int sliderX = contentX + 20;
                 int iconX = contentX + 2;
@@ -249,6 +241,13 @@ public class HideArmorScreen extends Screen {
                                                 HideArmorMod.broadcastConfig();
                                         rebuildWidgets();
                                 }, !config.enableMultiplayerSync, "Multiplayer sync"));
+
+                // ---- Global preset toggle (applies this preset to all players) ----
+                this.addRenderableWidget(new GlobeToggleButton(
+                                syncX + 24, iconY, 20, 20, config.globalPresetEnabled, b -> {
+                                        config.globalPresetEnabled = !config.globalPresetEnabled;
+                                        rebuildWidgets();
+                                }));
 
                 // ---- Done button ----
                 this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, btn -> this.onClose())
@@ -639,7 +638,7 @@ public class HideArmorScreen extends Screen {
                         ctx.fill(getX(), getY(), getX() + 1, getY() + getHeight(), borderColor);
                         ctx.fill(getX() + getWidth() - 1, getY(), getX() + getWidth(), getY() + getHeight(), borderColor);
 
-                        int iconSize = 12;
+                        int iconSize = 16;
                         int tint = enabled ? 0xFFFFFFFF : 0xFF666666;
                         ctx.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, GLOBE_TEXTURE,
                                         getX() + (getWidth() - iconSize) / 2,
